@@ -1,0 +1,1942 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0a0a0c" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://gpzqlcehqrokapezasff.supabase.co; connect-src 'self' https://gpzqlcehqrokapezasff.supabase.co wss://gpzqlcehqrokapezasff.supabase.co https:; frame-src https://nexo-oficial.pages.dev"
+    />
+    <title>NEXO Hub &amp; Operations</title>
+    <link rel="icon" type="image/svg+xml" href="./orca-icon.svg" />
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="./tailwind.config.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@1.59.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="boot-loader" class="boot-loader" role="status" aria-live="polite">
+      <div class="boot-loader-card">
+        <span class="boot-loader-orbit"></span>
+        <img src="./orca-icon.svg" alt="" class="boot-loader-icon" />
+        <span class="boot-loader-brand">NEXO</span>
+        <span class="boot-loader-label">INICIANDO SISTEMA</span>
+      </div>
+    </div>
+    <section
+      id="auth-screen"
+      class="fixed inset-0 z-[80] flex min-h-screen items-center justify-center overflow-y-auto bg-[#090a0c] px-4 py-8"
+    >
+      <div
+        class="auth-layout relative z-10 grid w-full max-w-6xl gap-7 lg:grid-cols-[.92fr,1.08fr] lg:gap-12"
+      >
+        <div class="flex flex-col justify-center">
+          <div class="mb-7 flex items-center gap-3">
+            <div
+              class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e5ff00]"
+            >
+              <img id="auth-logo" class="h-9 w-9 object-contain" alt="ORCA" />
+            </div>
+            <div>
+              <div class="text-2xl font-bold tracking-[-.06em]">
+                NEXO<span class="text-[#e5ff00]">.</span>
+              </div>
+              <div class="mono text-[9px] tracking-[.16em] text-[#858792]">
+                HUB & OPERATIONS / SECURE ENTRY
+              </div>
+            </div>
+          </div>
+          <div class="mono mb-2 text-[9px] tracking-[.22em] text-[#e5ff00]">
+            INTERNAL TEAM ACCESS
+          </div>
+          <h1 class="text-4xl font-semibold tracking-[-.06em]">
+            Tu equipo,<br />en control.
+          </h1>
+          <p class="mt-4 max-w-md text-sm leading-6 text-[#a0a0ab]">
+            Inicia sesión en el centro de operaciones NEXO. El propietario
+            administra las cinco tarjetas virtuales y sus contraseñas.
+          </p>
+          <div
+            class="mt-7 flex items-start gap-3 rounded-xl border border-[#4a3e20] bg-[#17130c] p-4"
+          >
+            <i
+              data-lucide="shield-alert"
+              class="mt-0.5 h-4 w-4 shrink-0 text-[#e5ff00]"
+            ></i>
+            <p class="text-[10px] leading-5 text-[#b5aa88]">
+              La sesión se valida con Supabase. Los datos y permisos dependen de
+              que el esquema y las políticas RLS estén aplicados en el proyecto.
+            </p>
+          </div>
+        </div>
+        <div
+          class="auth-card relative overflow-hidden rounded-[24px] p-5 shadow-2xl sm:p-8"
+        >
+          <div class="auth-card-top mb-6 flex items-center justify-between">
+            <span
+              class="mono text-[9px] font-semibold tracking-[.18em] text-[#a0a0ab]"
+              >NEXO <span class="text-[#e5ff00]">/</span> ACCESS GATE</span
+            ><span
+              class="auth-online mono flex items-center gap-2 rounded-full px-3 py-1.5 text-[8px] tracking-[.12em]"
+              ><i
+                class="auth-online-dot h-1.5 w-1.5 rounded-full bg-[#a3ffcf]"
+              ></i
+              >ENGINE ONLINE</span
+            >
+          </div>
+          <div id="owner-setup" class="hidden">
+            <div class="mono mb-2 text-[9px] tracking-[.16em] text-[#e5ff00]">
+              FIRST RUN / OWNER SETUP
+            </div>
+            <h2 class="text-xl font-semibold">Crea tu acceso propietario</h2>
+            <p class="mt-1 text-xs text-[#858792]">
+              Define tu contraseña privada. Después podrás configurar las
+              tarjetas del equipo.
+            </p>
+            <div class="mt-5 space-y-3">
+              <label class="block"
+                ><span class="label">Tu nombre</span
+                ><input
+                  id="setup-owner-name"
+                  class="field"
+                  placeholder="Propietario NEXO"
+                  maxlength="40" /></label
+              ><label class="block"
+                ><span class="label">Contraseña maestra</span>
+                <div class="relative">
+                  <input
+                    id="setup-owner-pass"
+                    class="field pr-11"
+                    type="password"
+                    minlength="12"
+                    autocomplete="new-password"
+                    placeholder="Mínimo 12 caracteres"
+                  /><button
+                    type="button"
+                    class="password-toggle"
+                    data-password-toggle
+                    data-password-target="setup-owner-pass"
+                    aria-label="Mostrar contraseña"
+                  >
+                    <i data-lucide="eye" class="h-4 w-4"></i>
+                  </button></div></label
+              ><label class="block"
+                ><span class="label">Confirmar contraseña</span>
+                <div class="relative">
+                  <input
+                    id="setup-owner-confirm"
+                    class="field pr-11"
+                    type="password"
+                    minlength="12"
+                    autocomplete="new-password"
+                    placeholder="Repite contraseña"
+                  /><button
+                    type="button"
+                    class="password-toggle"
+                    data-password-toggle
+                    data-password-target="setup-owner-confirm"
+                    aria-label="Mostrar contraseña"
+                  >
+                    <i data-lucide="eye" class="h-4 w-4"></i>
+                  </button></div></label
+              ><button
+                id="setup-owner-btn"
+                class="volt mt-2 w-full rounded-lg px-4 py-3 text-xs tracking-wide"
+              >
+                CREAR ACCESO PROPIETARIO
+              </button>
+            </div>
+          </div>
+          <div id="login-panel" class="hidden">
+            <div class="mono mb-2 text-[9px] tracking-[.18em] text-[#e5ff00]">
+              AUTHENTICATED OPERATIONS
+            </div>
+            <h2 class="text-2xl font-semibold tracking-[-.05em] sm:text-[28px]">
+              Iniciar sesión
+            </h2>
+            <p class="mt-1 text-xs text-[#858792]">
+              Usa el correo y la contraseña de tu cuenta NEXO.
+            </p>
+            <p class="mt-2 text-[10px] text-[#71737e]">
+              El propietario autoriza el acceso al equipo. Si aún no tienes
+              cuenta, créala aquí abajo.
+            </p>
+            <label class="mt-5 block">
+              <span class="label">Correo del equipo</span>
+              <input
+                id="login-email"
+                class="field"
+                type="email"
+                autocomplete="username"
+                placeholder="nombre@empresa.com"
+                required
+              />
+            </label>
+            <div
+              id="access-cards"
+              class="hidden mt-5 grid-cols-2 gap-2 sm:grid-cols-3"
+            ></div>
+            <div
+              id="selected-profile"
+              class="hidden team-selected mt-3 items-center gap-3 rounded-xl p-3"
+            >
+              <span class="team-avatar team-avatar-lg"
+                ><img id="selected-profile-avatar" class="hidden" alt="" /><span
+                  id="selected-profile-initials"
+                  >NX</span
+                ></span
+              >
+              <div class="min-w-0 flex-1">
+                <div class="mono text-[8px] tracking-[.14em] text-[#a0a0ab]">
+                  PERFIL SELECCIONADO
+                </div>
+                <div
+                  id="selected-profile-name"
+                  class="mt-1 truncate text-sm font-bold text-[#e5ff00]"
+                >
+                  Propietario
+                </div>
+                <div class="mt-1 flex flex-wrap items-center gap-2">
+                  <span id="selected-profile-role" class="team-status-chip"
+                    >OWNER</span
+                  ><span
+                    id="selected-profile-last"
+                    class="mono text-[8px] text-[#858792]"
+                    >LISTO PARA ACCEDER</span
+                  >
+                </div>
+              </div>
+              <span class="mono text-[8px] text-[#e5ff00]">NEXO</span>
+            </div>
+            <label class="mt-3 block"
+              ><span class="label">Contraseña</span>
+              <div class="relative">
+                <input
+                  id="login-password"
+                  class="field pr-11"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="••••••••"
+                /><button
+                  type="button"
+                  class="password-toggle"
+                  data-password-toggle
+                  data-password-target="login-password"
+                  aria-label="Mostrar contraseña"
+                >
+                  <i data-lucide="eye" class="h-4 w-4"></i>
+                </button></div
+            ></label>
+            <div
+              id="login-error"
+              class="mt-2 hidden text-xs text-[#ff9f9f]"
+            ></div>
+            <button
+              id="login-btn"
+              class="volt mt-4 w-full rounded-lg px-4 py-3 text-xs tracking-wide"
+            >
+              ENTRAR AL HUB</button
+            ><button
+              id="forgot-owner"
+              class="mt-4 w-full text-center text-[10px] text-[#747680] underline decoration-[#3d3e46] underline-offset-4"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+            <button
+              id="show-register"
+              class="mt-3 w-full text-center text-xs font-semibold text-[#e5ff00]"
+            >
+              Crear una cuenta
+            </button>
+          </div>
+          <div id="register-panel" class="hidden">
+            <div class="mono mb-2 text-[9px] tracking-[.18em] text-[#e5ff00]">
+              NUEVO INTEGRANTE / REGISTRO
+            </div>
+            <h2 class="text-2xl font-semibold tracking-[-.05em] sm:text-[28px]">
+              Crear una cuenta
+            </h2>
+            <p class="mt-2 text-xs leading-5 text-[#858792]">
+              Regístrate con tu correo. El propietario debe autorizar tu acceso al Hub.
+            </p>
+            <label class="mt-5 block">
+              <span class="label">Nombre</span>
+              <input id="register-name" class="field" autocomplete="name" maxlength="80" placeholder="Tu nombre" required />
+            </label>
+            <label class="mt-3 block">
+              <span class="label">Correo</span>
+              <input id="register-email" class="field" type="email" autocomplete="email" maxlength="254" placeholder="nombre@empresa.com" required />
+            </label>
+            <label class="mt-3 block">
+              <span class="label">Contraseña (mínimo 12 caracteres)</span>
+              <input id="register-password" class="field" type="password" autocomplete="new-password" minlength="12" required />
+            </label>
+            <label class="mt-3 block">
+              <span class="label">Confirmar contraseña</span>
+              <input id="register-confirm" class="field" type="password" autocomplete="new-password" minlength="12" required />
+            </label>
+            <div id="register-message" class="mt-3 hidden text-xs leading-5"></div>
+            <button id="register-btn" class="volt mt-4 w-full rounded-lg px-4 py-3 text-xs tracking-wide">
+              CREAR CUENTA
+            </button>
+            <button id="back-to-login" class="ghost mt-3 w-full rounded-lg px-4 py-3 text-xs">
+              VOLVER AL INICIO DE SESIÓN
+            </button>
+          </div>
+          <div id="recovery-panel" class="hidden">
+            <div class="mono mb-2 text-[9px] tracking-[.16em] text-[#a0a0ab]">
+              AYUDA DE ACCESO / OWNER
+            </div>
+            <h2 class="text-xl font-semibold">¿Olvidaste tu contraseña?</h2>
+            <p class="mt-3 text-xs leading-5 text-[#b8bac2]">
+              Te enviaremos un enlace seguro para restablecerla.
+            </p>
+            <label class="mt-4 block">
+              <span class="label">Correo del equipo</span>
+              <input
+                id="recovery-email"
+                class="field"
+                type="email"
+                autocomplete="email"
+                placeholder="nombre@empresa.com"
+                required
+              />
+            </label>
+            <div
+              id="recovery-error"
+              class="mt-2 hidden text-xs text-[#ff9f9f]"
+            ></div>
+            <button
+              id="send-recovery"
+              class="volt mt-4 w-full rounded-lg px-4 py-3 text-xs"
+            >
+              ENVIAR ENLACE DE RECUPERACIÓN
+            </button>
+            <div class="mt-5">
+              <button
+                id="cancel-recovery"
+                class="ghost w-full rounded-lg px-4 py-3 text-xs"
+              >
+                VOLVER AL LOGIN
+              </button>
+            </div>
+          </div>
+          <div id="password-reset-panel" class="hidden">
+            <div class="mono mb-2 text-[9px] tracking-[.16em] text-[#e5ff00]">
+              RECUPERACIÓN SEGURA
+            </div>
+            <h2 class="text-xl font-semibold">Crea una contraseña nueva</h2>
+            <label class="mt-4 block"
+              ><span class="label">Nueva contraseña</span
+              ><input
+                id="new-password"
+                class="field"
+                type="password"
+                autocomplete="new-password"
+                minlength="12"
+                placeholder="Mínimo 12 caracteres"
+            /></label>
+            <label class="mt-3 block"
+              ><span class="label">Confirma la contraseña</span
+              ><input
+                id="new-password-confirm"
+                class="field"
+                type="password"
+                autocomplete="new-password"
+                minlength="12"
+                placeholder="Repite la contraseña"
+            /></label>
+            <div
+              id="password-reset-error"
+              class="mt-2 hidden text-xs text-[#ff9f9f]"
+            ></div>
+            <button
+              id="save-new-password"
+              class="volt mt-4 w-full rounded-lg px-4 py-3 text-xs"
+            >
+              GUARDAR CONTRASEÑA
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div id="app-shell" class="min-h-screen pb-28 md:pb-20 hidden">
+      <header
+        class="sticky top-0 z-30 border-b border-[#22242d] bg-[#0a0a0c]/95 backdrop-blur-xl"
+      >
+        <div
+          class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-3.5"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e5ff00]"
+            >
+              <img id="brand-logo" alt="ORCA" class="h-8 w-8 object-contain" />
+            </div>
+            <div>
+              <div class="text-lg font-bold tracking-[-.06em]">
+                NEXO<span class="text-[#e5ff00]">.</span>
+              </div>
+              <div class="mono text-[9px] tracking-[.1em] text-[#858792]">
+                HUB & OPERATIONS <span class="text-[#e5ff00]">v1.0</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              id="open-profile"
+              type="button"
+              class="ghost flex items-center gap-2 rounded-xl px-2 py-1.5"
+              title="Abrir mi perfil"
+            >
+              <span class="team-avatar team-avatar-sm"
+                ><img id="session-avatar" class="hidden" alt="" /><span
+                  id="session-initials"
+                  >NX</span
+                ></span
+              ><span class="profile-user-meta flex min-w-0 flex-col items-start"
+                ><span
+                  id="session-name"
+                  class="max-w-24 truncate text-[10px] font-semibold text-white sm:max-w-36"
+                ></span
+                ><span
+                  class="profile-open-label mono text-[7px] tracking-[.13em] text-[#8c8f99]"
+                  >MI PERFIL</span
+                ></span
+              ><i
+                data-lucide="chevron-down"
+                class="h-3 w-3 text-[#858792]"
+              ></i></button
+            ><button
+              id="access-admin-btn"
+              class="ghost hidden items-center gap-1.5 rounded-lg px-3 py-2 text-[11px]"
+            >
+              <i data-lucide="key-round" class="h-3.5 w-3.5"></i>Accesos</button
+            ><button
+              id="lock-session-btn"
+              class="ghost flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[11px]"
+              title="Bloquear sesión ahora"
+              aria-label="Bloquear sesión ahora"
+            >
+              <i data-lucide="lock-keyhole" class="h-4 w-4"></i
+              ><span class="hidden lg:inline">Bloquear</span></button
+            ><button
+              id="logout-btn"
+              class="ghost flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px]"
+              title="Cerrar sesión"
+            >
+              <i data-lucide="log-out" class="h-3.5 w-3.5"></i
+              ><span class="hidden sm:inline">Salir</span></button
+            ><span
+              class="hidden rounded-full border border-[#29382f] bg-[#101713] px-2.5 py-1.5 mono text-[9px] text-[#a3ffcf] sm:inline-flex"
+              >● ENGINE ONLINE</span
+            ><button
+              id="help-btn"
+              class="ghost rounded-lg p-2"
+              title="Acerca de"
+            >
+              <i data-lucide="circle-help" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+      <nav class="bottom-nav">
+        <div class="bottom-nav-inner mx-auto flex max-w-6xl justify-around">
+          <button
+            class="nav-btn active flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="taller"
+          >
+            <i data-lucide="wrench" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >TALLER</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="ventas"
+          >
+            <i data-lucide="briefcase-business" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >VENTAS</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="links"
+          >
+            <i data-lucide="qr-code" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >QR & LINKS</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="metricas"
+          >
+            <i data-lucide="chart-no-axes-combined" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >MÉTRICAS</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="tareas"
+          >
+            <i data-lucide="list-checks" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >TAREAS</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="reportes"
+          >
+            <i data-lucide="chart-no-axes-column-increasing" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >REPORTES</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="webadmin"
+          >
+            <i data-lucide="layout-dashboard" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >ADMIN WEB</span
+            >
+          </button>
+        </div>
+      </nav>
+      <main class="content mx-auto max-w-6xl px-5 pt-7">
+        <div class="mb-7">
+          <div class="mono mb-2 text-[9px] tracking-[.22em] text-[#e5ff00]">
+            NEXO INTERNAL SYSTEMS / OPERATIONS
+          </div>
+          <h1
+            id="page-heading"
+            class="text-3xl font-semibold tracking-[-.05em]"
+          >
+            Taller <span class="text-[#747680]">/</span> Producción
+          </h1>
+          <p id="page-description" class="mt-1.5 text-sm text-[#999ba5]">
+            Herramientas rápidas para preparar, grabar y comprobar cada placa.
+          </p>
+        </div>
+
+        <section id="tab-taller" class="tab-pane active">
+          <div class="grid gap-4 lg:grid-cols-2">
+            <article class="panel rounded-2xl p-5 sm:p-6">
+              <div class="mb-5 flex items-start justify-between">
+                <div class="flex gap-3">
+                  <div class="rounded-lg bg-[#e5ff00]/10 p-2.5 text-[#e5ff00]">
+                    <i data-lucide="scale" class="h-5 w-5"></i>
+                  </div>
+                  <div>
+                    <h2 class="font-semibold">Calculadora de resina</h2>
+                    <p class="mt-1 text-xs text-[#858792]">
+                      Calcula la mezcla por peso en gramos.
+                    </p>
+                  </div>
+                </div>
+                <span class="mono text-[9px] text-[#777984]">MIX / 01</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <label
+                  ><span class="label">Relación de mezcla</span
+                  ><select id="resin-ratio" class="field">
+                    <option value="2">2 : 1 (A : B)</option>
+                    <option value="1">1 : 1 (A : B)</option>
+                  </select></label
+                ><label
+                  ><span class="label">Cantidad total (g)</span
+                  ><input
+                    id="resin-total"
+                    class="field"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    placeholder="Ej. 90"
+                /></label>
+              </div>
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <div
+                  class="rounded-xl border border-[#2a2c32] bg-[#0c0d10] p-4"
+                >
+                  <span class="label">Parte A · Resina</span>
+                  <div class="flex items-baseline gap-1">
+                    <span id="resin-a" class="text-2xl font-semibold">0.0</span
+                    ><span class="mono text-xs text-[#81838d]">g</span>
+                  </div>
+                </div>
+                <div
+                  class="rounded-xl border border-[#2a2c32] bg-[#0c0d10] p-4"
+                >
+                  <span class="label">Parte B · Catalizador</span>
+                  <div class="flex items-baseline gap-1">
+                    <span
+                      id="resin-b"
+                      class="text-2xl font-semibold text-[#e5ff00]"
+                      >0.0</span
+                    ><span class="mono text-xs text-[#81838d]">g</span>
+                  </div>
+                </div>
+              </div>
+              <div class="my-4 h-px bg-[#25262e]"></div>
+              <p class="label">O calcula por dimensiones aproximadas</p>
+              <div class="grid grid-cols-3 gap-2">
+                <label
+                  ><span class="label">Largo cm</span
+                  ><input
+                    id="dim-l"
+                    class="field"
+                    type="number"
+                    min="0"
+                    step=".1"
+                    placeholder="10" /></label
+                ><label
+                  ><span class="label">Ancho cm</span
+                  ><input
+                    id="dim-w"
+                    class="field"
+                    type="number"
+                    min="0"
+                    step=".1"
+                    placeholder="6" /></label
+                ><label
+                  ><span class="label">Grosor mm</span
+                  ><input
+                    id="dim-t"
+                    class="field"
+                    type="number"
+                    min="0"
+                    step=".1"
+                    placeholder="3"
+                /></label>
+              </div>
+              <div class="mt-3 flex items-center justify-between text-xs">
+                <span class="text-[#81838d]">Volumen calculado (aprox.)</span
+                ><span id="dim-result" class="mono text-[#a3ffcf]">— cm³</span>
+              </div>
+              <p class="mt-3 text-[10px] leading-4 text-[#656772]">
+                La densidad varía por producto. Considera merma y sigue siempre
+                la ficha técnica del fabricante; esta herramienta no sustituye
+                sus instrucciones.
+              </p>
+            </article>
+            <article class="panel rounded-2xl p-5 sm:p-6">
+              <div class="mb-5 flex items-start justify-between">
+                <div class="flex gap-3">
+                  <div class="rounded-lg bg-[#8ab4ff]/10 p-2.5 text-[#8ab4ff]">
+                    <i data-lucide="radio" class="h-5 w-5"></i>
+                  </div>
+                  <div>
+                    <h2 class="font-semibold">Helper NDEF / NFC</h2>
+                    <p class="mt-1 text-xs text-[#858792]">
+                      Prepara el registro URL para NFC Tools.
+                    </p>
+                  </div>
+                </div>
+                <span class="mono text-[9px] text-[#777984]">NDEF / 02</span>
+              </div>
+              <label
+                ><span class="label">Plantilla de destino</span
+                ><select id="ndef-kind" class="field">
+                  <option value="custom">URL personalizada</option>
+                  <option value="review">Reseña Google Maps</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="menu">Menú digital</option>
+                  <option value="instagram">Instagram</option>
+                </select></label
+              >
+              <div class="mt-3">
+                <label
+                  ><span class="label">URL final (payload NDEF)</span
+                  ><input
+                    id="ndef-url"
+                    class="field"
+                    type="url"
+                    placeholder="https://..."
+                    value=""
+                /></label>
+              </div>
+              <div
+                class="mt-4 rounded-xl border border-[#2b3f35] bg-[#0c1511] p-4"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="label mb-0 text-[#a3ffcf]"
+                    >STRING / URI RECORD</span
+                  ><span class="mono text-[9px] text-[#7c9a88]">TYPE: U</span>
+                </div>
+                <code
+                  id="ndef-payload"
+                  class="mono mono-box mt-3 block min-h-8 text-xs text-[#c5ffda]"
+                  >Ingresa una URL válida para generar el payload.</code
+                >
+              </div>
+              <button
+                id="copy-ndef"
+                class="volt mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-xs"
+              >
+                <i data-lucide="copy" class="h-4 w-4"></i>COPIAR PAYLOAD
+              </button>
+              <p class="mt-3 text-[10px] leading-4 text-[#747680]">
+                En NFC Tools: Escribir → Añadir un registro → URL/URI → pega el
+                enlace y acerca el teléfono a la etiqueta para grabarla. Usa una
+                URL corta de NEXO si quieres cambiar su destino a distancia.
+              </p>
+            </article>
+            <article class="panel rounded-2xl p-5 sm:p-6 lg:col-span-2">
+              <div class="mb-4 flex items-start justify-between">
+                <div class="flex gap-3">
+                  <div class="rounded-lg bg-[#a3ffcf]/10 p-2.5 text-[#a3ffcf]">
+                    <i data-lucide="activity" class="h-5 w-5"></i>
+                  </div>
+                  <div>
+                    <h2 class="font-semibold">Validador de redirección</h2>
+                    <p class="mt-1 text-xs text-[#858792]">
+                      Comprueba que el enlace responde antes de empaquetar la
+                      placa.
+                    </p>
+                  </div>
+                </div>
+                <span class="mono text-[9px] text-[#777984]">QA / 03</span>
+              </div>
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <input
+                  id="validate-url"
+                  class="field flex-1"
+                  type="url"
+                  placeholder="https://nexo.link/cliente"
+                /><button
+                  id="validate-btn"
+                  class="volt flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs"
+                >
+                  <i data-lucide="scan-search" class="h-4 w-4"></i>PROBAR ENLACE
+                </button>
+              </div>
+              <div
+                id="validate-result"
+                class="mt-3 hidden rounded-lg border border-[#30323a] bg-[#0c0d10] p-3 text-xs"
+              ></div>
+              <p class="mt-2 text-[10px] text-[#686a74]">
+                La comprobación desde el navegador depende de CORS del servidor
+                de destino. Si el navegador bloquea la respuesta, abre el enlace
+                para validarlo manualmente.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="tab-ventas" class="tab-pane">
+          <div class="grid gap-4 lg:grid-cols-[1.02fr,.98fr]">
+            <article class="panel rounded-2xl p-5 sm:p-6">
+              <div class="mb-5 flex gap-3">
+                <div class="rounded-lg bg-[#e5ff00]/10 p-2.5 text-[#e5ff00]">
+                  <i data-lucide="receipt-text" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <h2 class="font-semibold">Cotización express</h2>
+                  <p class="mt-1 text-xs text-[#858792]">
+                    Prepara una remisión y compártela con el cliente.
+                  </p>
+                </div>
+              </div>
+              <div class="quote-grid grid grid-cols-2 gap-3">
+                <label
+                  ><span class="label">Nombre del cliente</span
+                  ><input
+                    id="client-name"
+                    class="field"
+                    placeholder="Nombre / negocio" /></label
+                ><label
+                  ><span class="label">Teléfono</span
+                  ><input
+                    id="client-phone"
+                    class="field"
+                    type="tel"
+                    placeholder="10 dígitos" /></label
+                ><label
+                  ><span class="label">Placas NFC / QR</span
+                  ><input
+                    id="quote-qty"
+                    class="field"
+                    type="number"
+                    min="1"
+                    value="1" /></label
+                ><label
+                  ><span class="label">Precio por placa (MXN)</span
+                  ><input
+                    id="unit-price"
+                    class="field"
+                    type="number"
+                    min="0"
+                    step=".01"
+                    value="499" /></label
+                ><label
+                  class="flex items-center gap-3 rounded-lg border border-[#292a32] bg-[#0c0d10] p-3"
+                  ><input
+                    id="setup-service"
+                    type="checkbox"
+                    class="h-4 w-4 accent-[#e5ff00]"
+                  /><span class="text-xs"
+                    >Configuración inicial
+                    <span class="block text-[10px] text-[#777984]"
+                      >+ $199 MXN</span
+                    ></span
+                  ></label
+                ><label
+                  ><span class="label">Descuento (%)</span
+                  ><input
+                    id="discount"
+                    class="field"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value="0"
+                /></label>
+              </div>
+              <button
+                id="make-quote"
+                class="volt mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-xs"
+              >
+                <i data-lucide="file-check-2" class="h-4 w-4"></i>GENERAR
+                COTIZACIÓN
+              </button>
+            </article>
+            <article
+              id="quote-card"
+              class="panel quote-paper rounded-2xl p-5 sm:p-6"
+            >
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <img id="quote-logo" class="h-8 w-8 object-contain" /><span
+                    class="font-bold tracking-[-.05em]"
+                    >NEXO<span class="text-[#e5ff00]">.</span></span
+                  >
+                </div>
+                <span
+                  id="quote-status"
+                  class="mono rounded border border-[#33343d] px-2 py-1 text-[9px] text-[#858792]"
+                  >BORRADOR</span
+                >
+              </div>
+              <div class="border-y border-[#2a2b33] py-4">
+                <div class="mono text-[9px] tracking-[.16em] text-[#858792]">
+                  COTIZACIÓN / REMISIÓN
+                </div>
+                <div
+                  id="quote-client-display"
+                  class="mt-2 text-lg font-semibold"
+                >
+                  Cliente por confirmar
+                </div>
+                <div
+                  id="quote-date"
+                  class="mono mt-1 text-[10px] text-[#777984]"
+                ></div>
+              </div>
+              <div class="py-4">
+                <div class="flex justify-between text-xs">
+                  <span id="quote-line">1 × Placa NFC + QR</span
+                  ><span id="quote-subtotal">$499.00</span>
+                </div>
+                <div
+                  id="quote-setup-line"
+                  class="mt-2 hidden flex justify-between text-xs"
+                >
+                  <span>Configuración inicial</span><span>$199.00</span>
+                </div>
+                <div
+                  id="quote-discount-line"
+                  class="mt-2 hidden flex justify-between text-xs text-[#a3ffcf]"
+                >
+                  <span>Descuento</span
+                  ><span id="quote-discount-display"></span>
+                </div>
+                <div
+                  class="mt-4 flex justify-between border-t border-[#2a2b33] pt-3"
+                >
+                  <span class="text-sm font-semibold">Total</span
+                  ><span
+                    id="quote-total"
+                    class="mono text-lg font-semibold text-[#e5ff00]"
+                    >$499.00 MXN</span
+                  >
+                </div>
+              </div>
+              <div class="no-print flex gap-2">
+                <button
+                  id="copy-quote"
+                  class="volt flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-3 text-[11px]"
+                >
+                  <i data-lucide="message-circle" class="h-4 w-4"></i>COPIAR
+                  RESUMEN PARA WHATSAPP</button
+                ><button
+                  id="print-quote"
+                  class="ghost rounded-lg px-3 py-3"
+                  title="Imprimir"
+                >
+                  <i data-lucide="printer" class="h-4 w-4"></i>
+                </button>
+              </div>
+              <p class="print-only mt-5 text-xs text-gray-500">
+                Gracias por elegir NEXO. Cotización válida por 15 días.
+              </p>
+            </article>
+          </div>
+          <div class="mt-4 grid gap-4 lg:grid-cols-2">
+            <article class="panel rounded-2xl p-5 sm:p-6">
+              <div class="mb-4 flex gap-3">
+                <div class="rounded-lg bg-[#8ab4ff]/10 p-2.5 text-[#8ab4ff]">
+                  <i data-lucide="trending-up" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <h2 class="font-semibold">Calculadora ROI de reseñas</h2>
+                  <p class="mt-1 text-xs text-[#858792]">
+                    Una estimación para conversar con el negocio, no una
+                    garantía.
+                  </p>
+                </div>
+              </div>
+              <label
+                ><span class="label">Reseñas actuales por mes</span
+                ><input
+                  id="roi-current"
+                  class="field"
+                  type="number"
+                  min="0"
+                  value="10"
+              /></label>
+              <div class="mt-4">
+                <div class="mb-2 flex justify-between">
+                  <span class="label mb-0">Incremento estimado</span
+                  ><span id="roi-rate-label" class="mono text-xs text-[#e5ff00]"
+                    >+200%</span
+                  >
+                </div>
+                <input
+                  id="roi-rate"
+                  class="w-full accent-[#e5ff00]"
+                  type="range"
+                  min="50"
+                  max="400"
+                  step="50"
+                  value="200"
+                />
+              </div>
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <div
+                  class="rounded-xl border border-[#292a32] bg-[#0c0d10] p-4"
+                >
+                  <span class="label">Hoy / mes</span>
+                  <div id="roi-before" class="text-2xl font-semibold">10</div>
+                </div>
+                <div
+                  class="rounded-xl border border-[#293e35] bg-[#0c1511] p-4"
+                >
+                  <span class="label">Escenario estimado</span>
+                  <div
+                    id="roi-after"
+                    class="text-2xl font-semibold text-[#a3ffcf]"
+                  >
+                    30
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3 text-[10px] text-[#686a74]">
+                Proyección ilustrativa basada en el porcentaje seleccionado. Los
+                resultados reales dependen de tráfico, experiencia y solicitudes
+                al cliente.
+              </p>
+            </article>
+            <article class="panel rounded-2xl p-5 sm:p-6">
+              <div class="mb-4 flex gap-3">
+                <div class="rounded-lg bg-[#e5ff00]/10 p-2.5 text-[#e5ff00]">
+                  <i data-lucide="messages-square" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <h2 class="font-semibold">Guión comercial rápido</h2>
+                  <p class="mt-1 text-xs text-[#858792]">
+                    Respuestas breves para dudas comunes.
+                  </p>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <details
+                  class="rounded-lg border border-[#292a32] bg-[#0c0d10] p-3"
+                >
+                  <summary
+                    class="flex items-center justify-between text-xs font-medium"
+                  >
+                    ¿Y si el cliente no tiene NFC?<i
+                      data-lucide="chevron-down"
+                      class="h-4 w-4 text-[#777984]"
+                    ></i>
+                  </summary>
+                  <p
+                    class="mt-3 border-t border-[#26272f] pt-3 text-xs leading-5 text-[#a0a0ab]"
+                  >
+                    Puede escanear el código QR impreso en la misma placa. No
+                    necesita activar NFC ni instalar una app.
+                  </p>
+                </details>
+                <details
+                  class="rounded-lg border border-[#292a32] bg-[#0c0d10] p-3"
+                >
+                  <summary
+                    class="flex items-center justify-between text-xs font-medium"
+                  >
+                    ¿Cobran mensualidad?<i
+                      data-lucide="chevron-down"
+                      class="h-4 w-4 text-[#777984]"
+                    ></i>
+                  </summary>
+                  <p
+                    class="mt-3 border-t border-[#26272f] pt-3 text-xs leading-5 text-[#a0a0ab]"
+                  >
+                    La respuesta depende del plan y del servicio de enlaces
+                    contratado. Confirma las condiciones comerciales vigentes
+                    antes de cotizar.
+                  </p>
+                </details>
+                <details
+                  class="rounded-lg border border-[#292a32] bg-[#0c0d10] p-3"
+                >
+                  <summary
+                    class="flex items-center justify-between text-xs font-medium"
+                  >
+                    ¿Qué pasa si cambio de lugar mi negocio?<i
+                      data-lucide="chevron-down"
+                      class="h-4 w-4 text-[#777984]"
+                    ></i>
+                  </summary>
+                  <p
+                    class="mt-3 border-t border-[#26272f] pt-3 text-xs leading-5 text-[#a0a0ab]"
+                  >
+                    Si usas el enlace dinámico NEXO, puedes actualizar la
+                    dirección de destino desde el panel. La placa física
+                    funciona en cualquier ubicación.
+                  </p>
+                </details>
+                <details
+                  class="rounded-lg border border-[#292a32] bg-[#0c0d10] p-3"
+                >
+                  <summary
+                    class="flex items-center justify-between text-xs font-medium"
+                  >
+                    ¿Puedo cambiar el destino después?<i
+                      data-lucide="chevron-down"
+                      class="h-4 w-4 text-[#777984]"
+                    ></i>
+                  </summary>
+                  <p
+                    class="mt-3 border-t border-[#26272f] pt-3 text-xs leading-5 text-[#a0a0ab]"
+                  >
+                    Sí, siempre que el QR y la etiqueta NFC estén programados
+                    con tu enlace corto de NEXO y el servicio de redirección
+                    esté activo.
+                  </p>
+                </details>
+              </div>
+            </article>
+          </div>
+          <article class="panel mt-4 rounded-2xl p-5">
+            <div class="flex gap-3">
+              <i data-lucide="hard-drive" class="h-5 w-5 text-[#e5ff00]"></i>
+              <div>
+                <h2 class="text-sm font-semibold">Cotizaciones recientes</h2>
+                <div
+                  id="recent-quotes"
+                  class="mt-3 space-y-2 text-xs text-[#a0a0ab]"
+                ></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section id="tab-links" class="tab-pane">
+          <div class="grid gap-4 lg:grid-cols-[1fr,.75fr]">
+            <article class="panel rounded-2xl p-5 sm:p-6">
+              <div class="mb-5 flex items-center justify-between">
+                <div class="flex gap-3">
+                  <div class="rounded-lg bg-[#e5ff00]/10 p-2.5 text-[#e5ff00]">
+                    <i data-lucide="qr-code" class="h-5 w-5"></i>
+                  </div>
+                  <div>
+                    <h2 class="font-semibold">QR & enlaces dinámicos</h2>
+                    <p class="mt-1 text-xs text-[#858792]">
+                      Crea un alias y apunta el QR a una URL corta.
+                    </p>
+                  </div>
+                </div>
+                <span class="mono text-[9px] text-[#777984]">LINK / 04</span>
+              </div>
+              <label
+                ><span class="label">Cliente / negocio</span
+                ><input
+                  id="link-client"
+                  class="field"
+                  placeholder="Café Futura" /></label
+              ><label class="mt-3 block"
+                ><span class="label">Alias · nexo.link/</span
+                ><input
+                  id="link-slug"
+                  class="field"
+                  placeholder="cafe-futura"
+                  maxlength="48" /></label
+              ><label class="mt-3 block"
+                ><span class="label">Destino</span
+                ><input
+                  id="link-destination"
+                  class="field"
+                  type="url"
+                  placeholder="https://..."
+                  required
+              /></label>
+              <div class="mt-3 grid grid-cols-2 gap-3">
+                <label
+                  ><span class="label">Categoría</span
+                  ><select id="link-category" class="field">
+                    <option>Reseñas</option>
+                    <option>Menú</option>
+                    <option>Contacto</option>
+                    <option>Wi-Fi</option>
+                    <option>Redes</option>
+                    <option>Promoción</option>
+                    <option>Otro</option>
+                  </select></label
+                ><label
+                  ><span class="label">Marco del QR</span
+                  ><select id="link-frame" class="field">
+                    <option value="none">Sin marco</option>
+                    <option value="label">Etiqueta NEXO</option>
+                    <option value="scan">SCAN ME</option>
+                  </select></label
+                >
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-3">
+                <label
+                  ><span class="label">Módulos QR</span>
+                  <div class="field flex items-center gap-2 p-2">
+                    <input
+                      id="link-qr-color"
+                      type="color"
+                      value="#0a0a0c"
+                      class="h-7 w-8 border-0 bg-transparent"
+                    /><span
+                      id="link-qr-color-label"
+                      class="mono text-[10px] text-[#a0a0ab]"
+                      >#0A0A0C</span
+                    >
+                  </div></label
+                ><label
+                  ><span class="label">Fondo QR</span>
+                  <div class="field flex items-center gap-2 p-2">
+                    <input
+                      id="link-bg-color"
+                      type="color"
+                      value="#ffffff"
+                      class="h-7 w-8 border-0 bg-transparent"
+                    /><span
+                      id="link-bg-color-label"
+                      class="mono text-[10px] text-[#a0a0ab]"
+                      >#FFFFFF</span
+                    >
+                  </div></label
+                >
+              </div>
+              <div class="mt-4 flex gap-2">
+                <button
+                  id="save-link"
+                  class="volt flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-xs"
+                >
+                  <i data-lucide="save" class="h-4 w-4"></i>GUARDAR / ACTUALIZAR</button
+                ><button
+                  id="clear-link"
+                  class="ghost rounded-lg px-4 py-3 text-xs"
+                >
+                  NUEVO
+                </button>
+              </div>
+              <div
+                class="mt-4 rounded-lg border border-[#30313a] bg-[#0c0d10] p-3"
+              >
+                <span class="label">URL que codifica el QR</span>
+                <div
+                  id="link-short"
+                  class="mono break-all text-xs text-[#e5ff00]"
+                >
+                  https://nexo.link/tu-alias
+                </div>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button
+                  id="download-qr"
+                  class="ghost flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
+                >
+                  <i data-lucide="download" class="h-4 w-4"></i>BAJAR PNG</button
+                ><button
+                  id="copy-short"
+                  class="ghost flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
+                >
+                  <i data-lucide="copy" class="h-4 w-4"></i>COPIAR ENLACE
+                </button>
+              </div>
+              <p class="mt-3 text-[10px] leading-4 text-[#686a74]">
+                El alias y el destino se guardan en Supabase. Para redirección
+                dinámica real, configura nexo.link y conecta un servicio servidor.
+                Mientras no exista, usa un dominio que controles: un QR estático
+                no puede cambiar su destino por sí solo.
+              </p>
+            </article>
+            <aside
+              class="panel grid-bg flex flex-col items-center justify-center rounded-2xl p-6"
+            >
+              <div class="mb-4 flex w-full items-center justify-between">
+                <span class="mono text-[9px] tracking-[.16em] text-[#8f919b]"
+                  >QR PREVIEW / LIVE</span
+                ><span
+                  class="rounded-full border border-[#314237] px-2 py-1 mono text-[8px] text-[#a3ffcf]"
+                  >READY</span
+                >
+              </div>
+              <div id="qr-stage" class="relative rounded-xl bg-white p-3">
+                <div id="link-qr"></div>
+                <img
+                  id="qr-center-logo"
+                  class="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-lg border-4 border-white bg-white object-contain"
+                  alt="Logo NEXO"
+                />
+              </div>
+              <div
+                id="qr-frame-label"
+                class="mt-2 hidden mono text-[9px] font-bold tracking-[.18em] text-[#e5ff00]"
+              >
+                NEXO · LINK ENGINE
+              </div>
+              <div
+                id="qr-caption"
+                class="mono mt-3 max-w-full truncate text-xs text-[#e5ff00]"
+              >
+                nexo.link/tu-alias
+              </div>
+              <div class="mono mt-1 text-[9px] text-[#71737d]">
+                ERROR CORRECTION: H
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="tab-metricas" class="tab-pane">
+          <div class="card-grid grid grid-cols-4 gap-3">
+            <div class="panel metric rounded-xl p-4">
+              <div class="label">Placas registradas</div>
+              <div id="metric-plates" class="mt-1 text-3xl font-semibold">
+                00
+              </div>
+              <div class="mono mt-1 text-[9px] text-[#777984]">
+                LOCAL RECORDS
+              </div>
+            </div>
+            <div class="panel metric rounded-xl p-4">
+              <div class="label">Clics / escaneos*</div>
+              <div
+                id="metric-clicks"
+                class="mt-1 text-3xl font-semibold text-[#a3ffcf]"
+              >
+                000
+              </div>
+              <div class="mono mt-1 text-[9px] text-[#777984]">
+                DEMO / LOCAL
+              </div>
+            </div>
+            <div class="panel metric rounded-xl p-4">
+              <div class="label">Clientes activos</div>
+              <div
+                id="metric-clients"
+                class="mt-1 text-3xl font-semibold text-[#e5ff00]"
+              >
+                00
+              </div>
+              <div class="mono mt-1 text-[9px] text-[#777984]">SAVED LINKS</div>
+            </div>
+            <div class="panel metric rounded-xl p-4">
+              <div class="label">Cotizaciones</div>
+              <div
+                id="metric-quotes"
+                class="mt-1 text-3xl font-semibold text-[#8ab4ff]"
+              >
+                00
+              </div>
+              <div class="mono mt-1 text-[9px] text-[#777984]">
+                RECENT QUOTES
+              </div>
+            </div>
+          </div>
+          <article class="panel mt-4 overflow-hidden rounded-2xl">
+            <div
+              class="flex flex-wrap items-center justify-between gap-3 border-b border-[#25262e] p-5"
+            >
+              <div>
+                <h2 class="font-semibold">Administración de enlaces</h2>
+                <p class="mt-1 text-xs text-[#858792]">
+                  Edita clientes, alias, destinos y la apariencia del QR desde
+                  una sola vista.
+                </p>
+              </div>
+              <div class="relative">
+                <i
+                  data-lucide="search"
+                  class="absolute left-3 top-2.5 h-4 w-4 text-[#777984]"
+                ></i
+                ><input
+                  id="metrics-search"
+                  class="field w-56 py-2 pl-9 text-xs"
+                  placeholder="Buscar cliente..."
+                />
+              </div>
+            </div>
+            <div id="link-list" class="divide-y divide-[#22232a]"></div>
+            <div
+              id="links-empty"
+              class="hidden p-10 text-center text-xs text-[#858792]"
+            >
+              No hay enlaces todavía. Crea el primero en QR & Links.
+            </div>
+            <div
+              class="border-t border-[#25262e] px-5 py-3 text-[10px] leading-4 text-[#777984]"
+            >
+              * Los escaneos son una estimación demostrativa guardada
+              localmente; esta app no recibe eventos de escaneo. Analítica real
+              requiere backend de redirección.
+            </div>
+          </article>
+          <div class="mt-4 flex justify-end">
+            <button
+              id="export-data"
+              class="ghost flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs"
+            >
+              <i data-lucide="file-down" class="h-4 w-4"></i>EXPORTAR BACKUP
+              JSON
+            </button>
+          </div>
+        </section>
+        <section id="tab-webadmin" class="tab-pane">
+          <div class="panel overflow-hidden rounded-2xl">
+            <div
+              class="flex flex-wrap items-center justify-between gap-4 border-b border-[#25262e] p-4 sm:p-5"
+            >
+              <div class="flex items-start gap-3">
+                <div class="rounded-lg bg-[#e5ff00]/10 p-2.5 text-[#e5ff00]">
+                  <i data-lucide="shield-check" class="h-5 w-5"></i>
+                </div>
+                <div>
+                  <div class="mono text-[9px] tracking-[.16em] text-[#e5ff00]">
+                    NEXO OFICIAL / ADMINISTRACIÓN
+                  </div>
+                  <h2 class="mt-1 font-semibold">
+                    Panel de administración del sitio
+                  </h2>
+                  <p class="mt-1 text-xs text-[#858792]">
+                    Panel privado del sitio oficial NEXO. El acceso requiere el
+                    token del servidor.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="https://nexo-oficial.pages.dev/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                referrerpolicy="no-referrer"
+                class="volt flex items-center gap-2 rounded-lg px-4 py-2.5 text-[11px]"
+                ><i data-lucide="external-link" class="h-4 w-4"></i>ABRIR POR
+                SEPARADO</a
+              >
+            </div>
+            <div
+              class="border-b border-[#25262e] bg-[#17130c] px-4 py-3 text-[10px] leading-5 text-[#b5aa88] sm:px-5"
+            >
+              <i
+                data-lucide="lock-keyhole"
+                class="mr-1 inline h-3.5 w-3.5 text-[#e5ff00]"
+              ></i
+              >El panel solicita un token de administración privado. Se conserva
+              en la pestaña del panel; no lo guardes en este Hub ni lo
+              compartas.
+            </div>
+            <div class="bg-[#0a0a0c] p-2 sm:p-3">
+              <iframe
+                id="official-admin-frame"
+                src="https://nexo-oficial.pages.dev/admin"
+                title="Panel de Administración NEXO Oficial"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                sandbox="allow-forms allow-modals allow-popups allow-same-origin allow-scripts"
+                class="w-full rounded-lg border border-[#25262e] bg-[#0a0a0c]"
+                style="height: 75vh; min-height: 560px"
+              ></iframe>
+            </div>
+          </div>
+          <p class="mt-3 text-[10px] text-[#777984]">
+            Si el servidor bloquea la visualización dentro del Hub, usa «Abrir
+            por separado» para entrar al mismo panel.
+          </p>
+        </section>
+        <div
+          id="credential-reminder"
+          class="access-modal fixed inset-0 z-[85] hidden items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="credential-title"
+        >
+          <div class="panel w-full max-w-md rounded-2xl p-6 shadow-2xl">
+            <div
+              class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-[#514718] bg-[#e5ff00]/10 text-[#e5ff00]"
+            >
+              <i data-lucide="key-round" class="h-5 w-5"></i>
+            </div>
+            <div class="mono text-[9px] tracking-[.18em] text-[#e5ff00]">
+              DOS ACCESOS / DOS CREDENCIALES
+            </div>
+            <h2 id="credential-title" class="mt-2 text-xl font-semibold">
+              Recuerda: son diferentes
+            </h2>
+            <div class="mt-4 space-y-3">
+              <div class="rounded-lg border border-[#2c2d35] bg-[#0c0d10] p-3">
+                <div class="mono text-[9px] text-[#a0a0ab]">NEXO HUB</div>
+                <p class="mt-1 text-xs text-white">
+                  Usa la contraseña de tu tarjeta virtual para entrar a esta
+                  app.
+                </p>
+              </div>
+              <div class="rounded-lg border border-[#514718] bg-[#17130c] p-3">
+                <div class="mono text-[9px] text-[#e5ff00]">
+                  PANEL ADMIN OFICIAL
+                </div>
+                <p class="mt-1 text-xs text-[#e8dfc2]">
+                  Usa el token/contraseña privada configurada en el servidor. La
+                  contraseña del Hub no sirve en este panel.
+                </p>
+              </div>
+            </div>
+            <p class="mt-3 text-[10px] leading-4 text-[#777984]">
+              Por seguridad, el Hub no almacena ni muestra el token del panel.
+            </p>
+            <div class="mt-5 flex gap-2">
+              <button
+                id="cancel-admin-reminder"
+                class="ghost flex-1 rounded-lg px-4 py-3 text-xs"
+              >
+                VOLVER</button
+              ><button
+                id="continue-admin"
+                class="volt flex-1 rounded-lg px-4 py-3 text-xs"
+              >
+                ENTENDIDO, CONTINUAR
+              </button>
+            </div>
+          </div>
+        </div>
+        <section id="tab-tareas" class="tab-pane">
+          <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div class="mono text-[9px] tracking-[.18em] text-[#e5ff00]">
+                NEXO / OPERACIONES DE EQUIPO
+              </div>
+              <h2 class="mt-2 text-2xl font-semibold tracking-tight">
+                Pendientes del equipo
+              </h2>
+              <p class="mt-1 text-sm text-[#92949e]">
+                Tareas claras, responsables definidos y avance visible para
+                todos.
+              </p>
+            </div>
+            <div
+              class="mono rounded-xl border border-[#30323b] bg-[#121318] px-4 py-3 text-[10px] text-[#a0a0ab]"
+            >
+              <span class="text-[#e5ff00]">ENCARGADO</span
+              ><span class="ml-2 font-semibold text-white">Juan</span>
+            </div>
+          </div>
+          <div
+            id="task-summary"
+            class="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4"
+          ></div>
+          <div class="panel mb-5 rounded-2xl p-4 sm:p-5">
+            <div class="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="mono text-[9px] tracking-[.14em] text-[#a0a0ab]">
+                  AVANCE GENERAL DEL EQUIPO
+                </div>
+                <div id="task-progress-label" class="mt-1 text-xs text-white">
+                  0 de 0 tareas completadas
+                </div>
+              </div>
+              <div
+                id="task-progress-percent"
+                class="mono text-lg font-semibold text-[#e5ff00]"
+              >
+                0%
+              </div>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-[#25262e]">
+              <div
+                id="task-progress-bar"
+                class="h-full w-0 rounded-full bg-gradient-to-r from-[#b9ce00] via-[#e5ff00] to-[#f5ff88] transition-[width] duration-700 ease-out"
+                style="box-shadow: 0 0 15px #e5ff0066"
+              ></div>
+            </div>
+          </div>
+          <div class="grid gap-5 lg:grid-cols-[.8fr_1.2fr]">
+            <section
+              id="task-manager-panel"
+              class="panel hidden rounded-2xl p-5"
+            >
+              <div class="mb-4 flex items-center gap-3">
+                <div class="rounded-lg bg-[#e5ff00]/10 p-2 text-[#e5ff00]">
+                  <i data-lucide="square-pen" class="h-4 w-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold">Asignar pendiente</h3>
+                  <p class="text-[10px] text-[#858792]">
+                    Panel de coordinación de Juan
+                  </p>
+                </div>
+              </div>
+              <form id="task-form" class="space-y-3">
+                <label class="block"
+                  ><span class="label">Tarea</span
+                  ><input
+                    id="task-title"
+                    class="field"
+                    maxlength="90"
+                    required
+                    placeholder="Ej. Preparar 10 placas para Café Norte" /></label
+                ><label class="block"
+                  ><span class="label">Subtítulo</span
+                  ><input
+                    id="task-subtitle"
+                    class="field"
+                    maxlength="120"
+                    placeholder="Breve contexto para el equipo" /></label
+                ><label class="block"
+                  ><span class="label">Cuerpo / instrucciones</span
+                  ><textarea
+                    id="task-body"
+                    class="field min-h-[92px] resize-y"
+                    maxlength="600"
+                    placeholder="Describe qué hay que hacer, materiales necesarios y cómo validar el resultado"
+                  ></textarea></label
+                ><label class="block"
+                  ><span class="label"
+                    >Imágenes de referencia
+                    <span class="text-[#6f717c]">(hasta 3)</span></span
+                  ><input
+                    id="task-images"
+                    class="field !py-2 text-xs"
+                    type="file"
+                    accept="image/*"
+                    multiple />
+                  <div
+                    id="task-image-previews"
+                    class="mt-2 flex flex-wrap gap-2"
+                  ></div
+                ></label>
+                <div class="grid grid-cols-2 gap-3">
+                  <label
+                    ><span class="label">Prioridad</span
+                    ><select id="task-priority" class="field">
+                      <option value="normal">Normal</option>
+                      <option value="low">Baja</option>
+                      <option value="high">Alta</option>
+                      <option value="critical">Crítica</option>
+                    </select></label
+                  ><label
+                    ><span class="label">Asignar a</span
+                    ><select id="task-assignee" class="field"></select></label
+                  ><label class="col-span-2"
+                    ><span class="label">Fecha límite</span
+                    ><input id="task-due" class="field" type="date"
+                  /></label>
+                </div>
+                <button
+                  class="volt flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-[10px] font-bold tracking-wide"
+                >
+                  <i data-lucide="plus" class="h-4 w-4"></i>CREAR Y ASIGNAR
+                </button>
+              </form>
+              <div
+                class="mt-4 rounded-xl border border-[#262831] bg-[#0c0d10] p-3 text-[10px] leading-5 text-[#858792]"
+              >
+                Juan puede crear, asignar y retirar tareas. Cada integrante
+                puede actualizar el estado de sus pendientes.
+              </div>
+            </section>
+            <section class="panel rounded-2xl p-4 sm:p-5">
+              <div
+                class="mb-4 flex flex-wrap items-center justify-between gap-3"
+              >
+                <div>
+                  <h3 class="text-sm font-semibold">Tablero de tareas</h3>
+                  <p
+                    id="task-permission-hint"
+                    class="mt-1 text-[10px] text-[#858792]"
+                  ></p>
+                </div>
+                <select
+                  id="task-filter"
+                  class="field max-w-[210px] py-2 text-xs"
+                >
+                  <option value="all">Todo el equipo</option>
+                </select>
+              </div>
+              <div id="task-list" class="space-y-3"></div>
+            </section>
+          </div>
+        </section>
+        <div
+          id="orca-celebration"
+          class="fixed inset-0 z-[95] hidden items-center justify-center overflow-hidden bg-[#0a0a0c] text-[#0a0a0c]"
+          role="status"
+          aria-live="polite"
+        >
+          <div class="orca-color-fill absolute inset-0 bg-[#e5ff00]"></div>
+          <div
+            class="absolute inset-0 opacity-20"
+            style="
+              background-image: radial-gradient(#0a0a0c 1px, transparent 1px);
+              background-size: 18px 18px;
+            "
+          ></div>
+          <div
+            class="orca-burst absolute h-[min(78vw,560px)] w-[min(78vw,560px)] rounded-full border-[1px] border-[#0a0a0c]/20"
+          ></div>
+          <div
+            class="orca-celebrate-content relative flex flex-col items-center px-6 text-center"
+          >
+            <div
+              class="flex h-36 w-36 items-center justify-center rounded-[2rem] bg-[#0a0a0c] shadow-[0_25px_90px_#0a0a0c55] sm:h-44 sm:w-44"
+            >
+              <img
+                src="./orca-logo.svg"
+                alt="ORCA de NEXO"
+                class="orca-mark h-[78%] w-[78%] object-contain"
+                style="filter: invert(1)"
+              />
+            </div>
+            <div class="mono mt-7 text-[10px] font-bold tracking-[.25em]">
+              NEXO / MISIÓN COMPLETADA
+            </div>
+            <h2
+              id="orca-celebrate-title"
+              class="mt-2 text-3xl font-bold tracking-[-.06em] sm:text-5xl"
+            >
+              ¡Bien hecho!
+            </h2>
+            <p
+              id="orca-task-done"
+              class="mt-3 max-w-lg text-base font-semibold text-[#272b00]"
+            ></p>
+            <div class="mt-3 flex flex-wrap items-center justify-center gap-2">
+              <span
+                id="orca-who-done"
+                class="rounded-full border border-[#0a0a0c]/25 px-3 py-1.5 mono text-[10px]"
+              ></span
+              ><span
+                id="orca-priority-done"
+                class="rounded-full border border-[#0a0a0c]/25 px-3 py-1.5 mono text-[10px] font-bold"
+              ></span>
+            </div>
+            <button
+              id="orca-celebration-close"
+              class="volt mt-8 rounded-xl border border-[#0a0a0c]/15 px-6 py-3 mono text-[10px] font-bold tracking-[.12em] shadow-lg"
+            >
+              VOLVER AL TABLERO <span aria-hidden="true">↗</span>
+            </button>
+            <p class="mono mt-3 text-[8px] tracking-[.12em] text-[#272b00]/70">
+              PANTALLA DE CELEBRACIÓN · CIERRA CUANDO QUIERAS
+            </p>
+          </div>
+        </div>
+        <section id="tab-reportes" class="tab-pane">
+          <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div class="mono text-[9px] tracking-[.18em] text-[#e5ff00]">
+                NEXO / REPORTE DE OPERACIONES
+              </div>
+              <h2 class="mt-2 text-2xl font-semibold tracking-tight">
+                Semana en curso
+              </h2>
+              <p id="report-week-range" class="mt-1 text-sm text-[#92949e]"></p>
+            </div>
+            <button
+              id="copy-weekly-report"
+              class="ghost flex items-center gap-2 rounded-lg px-4 py-2.5 text-[10px]"
+            >
+              <i data-lucide="copy" class="h-4 w-4"></i>COPIAR REPORTE
+            </button>
+          </div>
+          <div
+            id="weekly-summary"
+            class="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4"
+          ></div>
+          <div class="grid gap-5 lg:grid-cols-[.9fr_1.1fr]">
+            <section class="panel rounded-2xl p-5">
+              <div class="mb-4">
+                <div class="mono text-[9px] tracking-[.14em] text-[#a0a0ab]">
+                  RITMO DE CIERRE
+                </div>
+                <h3 class="mt-1 text-sm font-semibold">
+                  Tareas completadas por día
+                </h3>
+              </div>
+              <div id="weekly-chart" class="grid grid-cols-7 gap-2"></div>
+            </section>
+            <section class="panel rounded-2xl p-5">
+              <div class="mb-4">
+                <div class="mono text-[9px] tracking-[.14em] text-[#a0a0ab]">
+                  CARGA DEL EQUIPO
+                </div>
+                <h3 class="mt-1 text-sm font-semibold">
+                  Progreso por integrante
+                </h3>
+              </div>
+              <div id="weekly-members" class="space-y-4"></div>
+            </section>
+          </div>
+          <section class="panel mt-5 rounded-2xl p-5">
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="mono text-[9px] tracking-[.14em] text-[#a0a0ab]">
+                  TRABAJO ACTIVO
+                </div>
+                <h3 class="mt-1 text-sm font-semibold">
+                  En qué está trabajando el equipo
+                </h3>
+              </div>
+              <span
+                id="weekly-active-count"
+                class="mono rounded-lg border border-[#30323b] px-3 py-2 text-[9px] text-[#a0a0ab]"
+              ></span>
+            </div>
+            <div
+              id="weekly-active-tasks"
+              class="grid gap-3 md:grid-cols-2"
+            ></div>
+          </section>
+        </section>
+        <footer
+          class="mt-10 border-t border-[#22242d] pt-4 text-center mono text-[9px] tracking-[.08em] text-[#646670]"
+        >
+          NEXO HUB v1.0 <span class="text-[#e5ff00]">✳</span> LOCAL OPS / DATA
+          ON DEVICE · PWA FULL INSTALL REQUIRES HTTPS + SERVICE WORKER
+        </footer>
+      </main>
+    </div>
+    <div
+      id="glass-scrollbar"
+      class="glass-scrollbar hidden"
+      role="scrollbar"
+      aria-label="Desplazamiento de página"
+      aria-controls="app-shell"
+      aria-orientation="vertical"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      tabindex="0"
+    >
+      <div class="glass-scroll-track">
+        <div id="glass-scroll-thumb" class="glass-scroll-thumb"></div>
+      </div>
+    </div>
+    <div
+      id="toast"
+      class="toast fixed bottom-24 left-1/2 z-50 rounded-lg border border-[#454718] bg-[#17190e] px-4 py-3 text-xs text-[#e5ff00] shadow-xl md:bottom-20"
+    ></div>
+    <div
+      id="profile-modal"
+      class="access-modal fixed inset-0 z-[85] hidden items-center justify-center overflow-y-auto p-4"
+    >
+      <div class="panel w-full max-w-lg rounded-2xl p-5 sm:p-7">
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="mono text-[9px] tracking-[.16em] text-[#e5ff00]">
+              NEXO ID / EQUIPO
+            </div>
+            <h2 class="mt-1 text-xl font-semibold">Mi perfil de equipo</h2>
+            <p class="mt-1 text-xs text-[#858792]">
+              Tu identidad de campo y prioridad de hoy.
+            </p>
+          </div>
+          <button
+            id="close-profile"
+            class="ghost rounded-lg p-2"
+            aria-label="Cerrar perfil"
+          >
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+        <div
+          class="profile-identity mt-5 flex items-center gap-4 rounded-xl border border-[#292a32] bg-[#0c0d10] p-4"
+        >
+          <span class="team-avatar team-avatar-xl"
+            ><img
+              id="profile-photo-preview"
+              class="hidden"
+              alt="Vista previa de tu foto"
+            /><span id="profile-photo-initials">NX</span></span
+          >
+          <div class="min-w-0">
+            <div
+              id="profile-card-name"
+              class="truncate text-base font-bold text-[#e5ff00]"
+            >
+              Miembro NEXO
+            </div>
+            <div class="mono mt-1 text-[9px] text-[#a0a0ab]">
+              PERFIL NEXO / CUENTA AUTORIZADA
+            </div>
+            <button
+              id="choose-profile-photo"
+              class="volt mt-3 rounded-lg px-3 py-2 text-[9px]"
+            >
+              ADJUNTAR FOTO</button
+            ><button
+              id="remove-profile-photo"
+              class="ghost ml-2 rounded-lg px-3 py-2 text-[9px]"
+            >
+              QUITAR</button
+            ><input
+              id="profile-photo-file"
+              class="hidden"
+              type="file"
+              accept="image/*"
+            />
+          </div>
+        </div>
+        <div class="mt-4 grid gap-3">
+          <label
+            ><span class="label">Nombre visible</span
+            ><input
+              id="profile-display-name"
+              class="field"
+              maxlength="40"
+              placeholder="Tu nombre" /></label
+          ><label
+            ><span class="label">Estado del equipo</span
+            ><select id="profile-status" class="field">
+              <option value="Disponible">Disponible</option>
+              <option value="En campo">En campo</option>
+              <option value="En producción">En producción</option>
+              <option value="En ruta">En ruta</option>
+            </select></label
+          ><label
+            ><span class="label">Misión de hoy</span
+            ><textarea
+              id="profile-goal"
+              class="field min-h-20 resize-y"
+              maxlength="120"
+              placeholder="Ej. Visitar 5 negocios y activar 2 placas"
+            ></textarea>
+          </label>
+          <div class="flex items-center justify-between">
+            <span id="profile-count" class="mono text-[8px] text-[#737680]"
+              >0 / 120</span
+            ><span class="mono text-[8px] text-[#a3ffcf]"
+              >TU CONTRASEÑA SIGUE PROTEGIDA</span
+            >
+          </div>
+        </div>
+        <div class="mt-5 flex gap-2">
+          <button
+            id="cancel-profile"
+            class="ghost flex-1 rounded-lg px-4 py-3 text-xs"
+          >
+            CANCELAR</button
+          ><button
+            id="save-profile"
+            class="volt flex-1 rounded-lg px-4 py-3 text-xs"
+          >
+            GUARDAR MI PERFIL
+          </button>
+        </div>
+        <p class="mt-3 text-[9px] leading-4 text-[#6d707a]">
+          Tu nombre, estado y misión se guardan en el perfil del equipo. La
+          contraseña se administra con Supabase Auth y no se muestra en esta
+          pantalla.
+        </p>
+      </div>
+    </div>
+    <div
+      id="access-modal"
+      class="access-modal fixed inset-0 z-[90] hidden items-center justify-center overflow-y-auto p-4"
+    >
+      <div
+        class="panel max-h-[calc(100vh-2rem)] w-full max-w-6xl overflow-y-auto rounded-2xl p-5 sm:p-7"
+      >
+        <div class="flex items-start justify-between">
+          <div>
+            <div class="mono text-[9px] tracking-[.16em] text-[#e5ff00]">
+              OWNER CONTROL / TEAM ACCOUNTS
+            </div>
+            <h2 class="mt-1 text-xl font-semibold">Administrar accesos</h2>
+            <p class="mt-1 text-xs text-[#858792]">
+              Las cuentas se administran con Supabase Auth. Por seguridad no
+              puedes consultar las contraseñas del equipo.
+            </p>
+          </div>
+          <button id="close-access" class="ghost rounded-lg p-2">
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+        <div
+          id="member-admin-list"
+          class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+        ></div>
+        <section
+          class="mt-6 rounded-2xl border border-[#ffffff12] bg-[#0d0e12]/80 p-4 sm:p-5"
+        >
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div class="mono text-[9px] tracking-[.15em] text-[#e5ff00]">
+                SECURITY / TEAM ACCESS
+              </div>
+              <h3 class="mt-1 text-sm font-semibold">
+                Actividad reciente en este dispositivo
+              </h3>
+            </div>
+            <span
+              class="mono rounded-full border border-[#a3ffcf]/20 bg-[#a3ffcf]/5 px-2.5 py-1 text-[8px] text-[#a3ffcf]"
+              >LOCAL</span
+            >
+          </div>
+          <div
+            id="security-event-list"
+            class="max-h-52 space-y-2 overflow-y-auto"
+          ></div>
+          <p class="mt-3 text-[9px] text-[#777984]">
+            Gestiona invitaciones y restablecimientos desde Supabase
+            Authentication. Nunca compartas ni almacenes contraseñas del equipo
+            en esta lista.
+          </p>
+        </section>
+        <p
+          class="mt-5 rounded-lg border border-[#4a3e20] bg-[#17130c] p-3 text-[10px] leading-4 text-[#b5aa88]"
+        >
+          Crea o desactiva usuarios en Supabase Authentication y agrega su
+          perfil a <code>team_members</code>. La app jamás muestra contraseñas
+          guardadas.
+        </p>
+      </div>
+    </div>
+    <script src="./script.js"></script>
+  </body>
+</html>
