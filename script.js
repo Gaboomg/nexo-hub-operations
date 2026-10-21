@@ -1543,21 +1543,34 @@
     const oldAvatarPath = rec.avatarPath || null;
     let newAvatarPath = oldAvatarPath;
     let uploadedPath = null;
+    let savedPhotoUrl = "";
+    let saveStage = "preparar la foto";
     try {
       if (profileDraftPhoto.startsWith("data:image/jpeg;base64,")) {
         const response = await fetch(profileDraftPhoto);
         const blob = await response.blob();
+        if (blob.size > 1024 * 1024)
+          throw new Error("La foto comprimida supera el límite de 1 MB.");
         const path = "avatars/" + activeSession.userId + "/" + crypto.randomUUID() + ".jpg";
+        saveStage = "subir la foto a Storage";
         const { error: uploadError } = await supabaseClient.storage
           .from("nexo-private")
           .upload(path, blob, { contentType: "image/jpeg", upsert: false });
         if (uploadError) throw uploadError;
         uploadedPath = path;
         newAvatarPath = path;
+        saveStage = "verificar la foto guardada";
+        const { data: signedData, error: signedError } = await supabaseClient.storage
+          .from("nexo-private")
+          .createSignedUrl(path, 3600);
+        if (signedError) throw signedError;
+        savedPhotoUrl = signedData?.signedUrl || "";
+        if (!savedPhotoUrl) throw new Error("Storage no devolvió la URL segura de la foto.");
       } else if (!profileDraftPhoto) {
         newAvatarPath = null;
       }
-      const { error } = await supabaseClient
+      saveStage = "guardar el perfil en la base de datos";
+      const { data: updatedProfile, error } = await supabaseClient
         .from("team_members")
         .update({
           display_name: name,
@@ -1565,20 +1578,41 @@
           goal,
           avatar_path: newAvatarPath,
         })
-        .eq("user_id", activeSession.userId);
+        .eq("user_id", activeSession.userId)
+        .select("user_id")
+        .maybeSingle();
       if (error) throw error;
+      if (!updatedProfile)
+        throw new Error("No se actualizó ningún perfil para esta cuenta.");
       if (oldAvatarPath && oldAvatarPath !== newAvatarPath) {
         await supabaseClient.storage.from("nexo-private").remove([oldAvatarPath]);
       }
-    } catch {
-      if (uploadedPath) await supabaseClient.storage.from("nexo-private").remove([uploadedPath]);
-      toast("No se pudo guardar el perfil o su foto. Verifica las políticas de Storage en Supabase.");
+    } catch (error) {
+      if (uploadedPath) {
+        try {
+          await supabaseClient.storage.from("nexo-private").remove([uploadedPath]);
+        } catch {}
+      }
+      const message = String(error?.message || "");
+      console.error("NEXO: error al guardar el perfil", {
+        stage: saveStage,
+        code: error?.code || error?.statusCode || "",
+        message,
+      });
+      const detail = /row-level security|permission denied/i.test(message)
+        ? "Supabase rechazó el permiso de esta cuenta. Cierra sesión y vuelve a entrar; si sigue, revisa el perfil del equipo."
+        : /too large|payload too large|límite de 1 mb/i.test(message)
+          ? "La foto debe pesar menos de 1 MB después de comprimirla."
+          : `Falló al ${saveStage}. ${message.slice(0, 100)}`;
+      toast(`No se guardó el perfil. ${detail}`);
       button.disabled = false;
       return;
     }
     rec.name = name;
     rec.avatarPath = newAvatarPath || "";
-    rec.photo = await signedAvatar(rec.avatarPath);
+    rec.photo = newAvatarPath === oldAvatarPath
+      ? await signedAvatar(rec.avatarPath)
+      : savedPhotoUrl;
     rec.status = status;
     rec.goal = goal;
     activeSession.name = name;
