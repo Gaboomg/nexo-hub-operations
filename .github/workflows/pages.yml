@@ -27,7 +27,7 @@ jobs:
       - name: Prepare the public site
         run: |
           mkdir -p dist
-          cp index.html style.css script.js tailwind.config.js orca-icon.svg orca-logo.svg nexo-icon.svg dist/
+          cp index.html style.css tailwind.css script.js orca-icon.svg orca-logo.svg nexo-icon.svg dist/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
