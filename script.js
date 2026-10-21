@@ -1281,6 +1281,8 @@
     const confirm = $("#register-confirm").value;
     const message = $("#register-message");
     const button = $("#register-btn");
+    const registrationNotice =
+      "Si el correo puede registrarse, recibirás instrucciones para confirmar la cuenta. Si ya tienes cuenta, inicia sesión o usa ¿Olvidaste tu contraseña?.";
     const showMessage = (text, success = false) => {
       message.textContent = text;
       message.className = `mt-3 text-xs leading-5 ${success ? "text-[#a3ffcf]" : "text-[#ff9f9f]"}`;
@@ -1304,6 +1306,9 @@
         password,
         options,
       });
+      const identities = data?.user?.identities;
+      const obfuscatedAccount =
+        Array.isArray(identities) && identities.length === 0;
       if (error) {
         if (
           error.message?.includes("NEXO_TEAM_ACCOUNT_LIMIT_REACHED") ||
@@ -1316,21 +1321,19 @@
         }
         showMessage(
           error.message?.toLowerCase().includes("already")
-            ? "No se pudo crear la cuenta. Revisa el correo o intenta iniciar sesión si ya te habías registrado."
+            ? registrationNotice
             : "No se pudo crear la cuenta. El equipo admite hasta 6 cuentas; si aún hay cupo, revisa los datos e inténtalo de nuevo.",
+          error.message?.toLowerCase().includes("already"),
         );
         return;
       }
       $("#register-password").value = "";
       $("#register-confirm").value = "";
-      if (data.session && data.user) {
+      if (data.session && data.user && !obfuscatedAccount) {
         showMessage("Cuenta creada. Entrando al Hub…", true);
         await enterAuthenticatedApp(data.user);
       } else {
-        showMessage(
-          "Cuenta creada. Confirma tu correo si recibiste un enlace; después podrás entrar automáticamente como integrante, sin autorización del propietario.",
-          true,
-        );
+        showMessage(registrationNotice, true);
       }
     } catch {
       showMessage("No se pudo conectar con el servicio de acceso.");
