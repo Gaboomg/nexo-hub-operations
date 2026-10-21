@@ -1305,6 +1305,15 @@
         options,
       });
       if (error) {
+        if (
+          error.message?.includes("NEXO_TEAM_ACCOUNT_LIMIT_REACHED") ||
+          error.code === "NEXO_TEAM_ACCOUNT_LIMIT_REACHED"
+        ) {
+          showMessage(
+            "El equipo alcanzó el límite de 6 cuentas. El propietario debe liberar un cupo antes de registrar a otra persona.",
+          );
+          return;
+        }
         showMessage(
           error.message?.toLowerCase().includes("already")
             ? "No se pudo crear la cuenta. Revisa el correo o intenta iniciar sesión si ya te habías registrado."
