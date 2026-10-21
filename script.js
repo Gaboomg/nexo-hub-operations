@@ -1317,7 +1317,7 @@
         showMessage(
           error.message?.toLowerCase().includes("already")
             ? "No se pudo crear la cuenta. Revisa el correo o intenta iniciar sesión si ya te habías registrado."
-            : "No se pudo crear la cuenta. Revisa los datos e inténtalo de nuevo.",
+            : "No se pudo crear la cuenta. El equipo admite hasta 6 cuentas; si aún hay cupo, revisa los datos e inténtalo de nuevo.",
         );
         return;
       }
