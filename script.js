@@ -1547,8 +1547,11 @@
     let saveStage = "preparar la foto";
     try {
       if (profileDraftPhoto.startsWith("data:image/jpeg;base64,")) {
-        const response = await fetch(profileDraftPhoto);
-        const blob = await response.blob();
+        const base64 = profileDraftPhoto.split(",")[1];
+        const bytes = Uint8Array.from(atob(base64), (character) =>
+          character.charCodeAt(0),
+        );
+        const blob = new Blob([bytes], { type: "image/jpeg" });
         if (blob.size > 1024 * 1024)
           throw new Error("La foto comprimida supera el límite de 1 MB.");
         const path = "avatars/" + activeSession.userId + "/" + crypto.randomUUID() + ".jpg";
