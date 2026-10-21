@@ -1299,7 +1299,7 @@
       const options = { data: { display_name: name } };
       if (location.protocol === "https:")
         options.emailRedirectTo = `${location.origin}${location.pathname}`;
-      const { error } = await supabaseClient.auth.signUp({
+      const { data, error } = await supabaseClient.auth.signUp({
         email,
         password,
         options,
@@ -1323,10 +1323,15 @@
       }
       $("#register-password").value = "";
       $("#register-confirm").value = "";
-      showMessage(
-        "Cuenta creada. Revisa tu correo si Supabase solicita confirmación y pide al propietario que autorice tu perfil para entrar al Hub.",
-        true,
-      );
+      if (data.session && data.user) {
+        showMessage("Cuenta creada. Entrando al Hub…", true);
+        await enterAuthenticatedApp(data.user);
+      } else {
+        showMessage(
+          "Cuenta creada. Confirma tu correo si recibiste un enlace; después podrás entrar automáticamente como integrante, sin autorización del propietario.",
+          true,
+        );
+      }
     } catch {
       showMessage("No se pudo conectar con el servicio de acceso.");
     } finally {
