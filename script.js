@@ -636,7 +636,98 @@
     SECURITY_LOG_KEY = "nexo-hub-security-log-v1";
   let idleLockTimer = 0,
     lastSessionActivity = 0,
-    securityEvents = [];
+    securityEvents = [],
+    taskNotificationTimer = 0,
+    taskNotificationSnapshot = null;
+  function updateNotificationButton() {
+    const button = $("#notifications-btn");
+    if (!button) return;
+    const supported = "Notification" in window && window.isSecureContext;
+    button.classList.toggle("hidden", !supported);
+    if (!supported) return;
+    const enabled = Notification.permission === "granted";
+    button.innerHTML = `<i data-lucide="${enabled ? "bell-ring" : "bell"}" class="h-4 w-4"></i><span class="hidden sm:inline">${enabled ? "Avisos ON" : "Avisos"}</span>`;
+    button.title = enabled
+      ? "Los avisos del Hub están activos en este dispositivo"
+      : "Activar avisos gratuitos en este dispositivo";
+    lucide.createIcons();
+  }
+  function sendTaskNotification(title, body) {
+    toast(`${title} · ${body}`);
+    if (
+      document.hidden &&
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      try {
+        new Notification(`NEXO · ${title}`, {
+          body,
+          icon: "./orca-icon.svg",
+          tag: "nexo-team-update",
+        });
+      } catch {}
+    }
+  }
+  async function pollTeamTaskChanges() {
+    if (!activeSession) return;
+    const { data, error } = await supabaseClient
+      .from("tasks")
+      .select("id,title,assignee_id,status,created_at,completed_at")
+      .order("created_at", { ascending: false });
+    if (error || !Array.isArray(data)) return;
+    const next = new Map(data.map((task) => [task.id, task]));
+    if (taskNotificationSnapshot) {
+      for (const task of data) {
+        const previous = taskNotificationSnapshot.get(task.id);
+        const assignee = teamMembers.find((member) => member.id === task.assignee_id);
+        if (!previous) {
+          sendTaskNotification(
+            "Nueva tarea para el equipo",
+            `${task.title} · ${assignee?.name || "Integrante"}`,
+          );
+        } else if (previous.status !== "done" && task.status === "done") {
+          sendTaskNotification(
+            "Avance semanal actualizado",
+            `${assignee?.name || "El equipo"} completó: ${task.title}`,
+          );
+        }
+      }
+    }
+    taskNotificationSnapshot = next;
+  }
+  function startTaskNotifications() {
+    clearInterval(taskNotificationTimer);
+    taskNotificationSnapshot = new Map(
+      tasks.map((task) => [
+        task.id,
+        { id: task.id, title: task.title, status: task.status, assignee_id: task.assigneeKey },
+      ]),
+    );
+    taskNotificationTimer = setInterval(pollTeamTaskChanges, 45000);
+    updateNotificationButton();
+  }
+  function stopTaskNotifications() {
+    clearInterval(taskNotificationTimer);
+    taskNotificationTimer = 0;
+    taskNotificationSnapshot = null;
+  }
+  $("#notifications-btn")?.addEventListener("click", async () => {
+    if (!("Notification" in window) || !window.isSecureContext) {
+      toast("Los avisos del navegador requieren una página HTTPS compatible");
+      return;
+    }
+    if (Notification.permission === "granted") {
+      toast("Los avisos están activos en este dispositivo mientras el Hub esté abierto");
+      return;
+    }
+    if (Notification.permission === "denied") {
+      toast("Permite las notificaciones de este sitio desde los ajustes del navegador");
+      return;
+    }
+    const permission = await Notification.requestPermission();
+    updateNotificationButton();
+    toast(permission === "granted" ? "Avisos activados en este dispositivo" : "No se activaron los avisos");
+  });
   function addSecurityEvent(type, detail = "") {
     securityEvents.unshift({
       type,
@@ -682,6 +773,7 @@
     );
     selectedAccess = activeSession.index;
     activeSession = null;
+    stopTaskNotifications();
     clearTimeout(idleLockTimer);
     $("#login-password").value = "";
     $("#profile-modal").classList.add("hidden");
@@ -1120,6 +1212,7 @@
         email: member.email,
       };
       await loadWorkspaceData();
+      startTaskNotifications();
       applyRoleAccess(profile.role);
       renderAll();
       renderTasks();
@@ -1427,6 +1520,7 @@
   $("#logout-btn").onclick = async () => {
     if (activeSession) addSecurityEvent("Cierre de sesión", activeSession.name);
     activeSession = null;
+    stopTaskNotifications();
     clearTimeout(idleLockTimer);
     $("#app-shell").classList.add("hidden");
     $("#glass-scrollbar").classList.add("hidden");
@@ -2080,7 +2174,7 @@
       : '<div class="col-span-full rounded-xl border border-dashed border-[#343640] px-4 py-8 text-center text-xs text-[#858792]">No hay tareas activas. Gran semana: todo está al día.</div>';
     lucide.createIcons();
   }
-  $("#copy-weekly-report").onclick = async () => {
+  function weeklyReportText() {
     let { start, end } = weekBounds(),
       completed = tasks.filter((t) =>
         dateInsideWeek(t.completedAt, start, end),
@@ -2088,13 +2182,20 @@
       active = tasks.filter((t) => t.status !== "done"),
       created = tasks.filter((t) => dateInsideWeek(t.createdAt, start, end)),
       members = taskMembers();
-    let text = `NEXO · REPORTE SEMANAL\n${created.length} tareas nuevas · ${completed.length} completadas · ${active.length} activas\n\nCarga actual:\n${active.map((t) => `• ${t.title} — ${t.assignee} [${{ critical: "CRÍTICA", high: "ALTA", normal: "NORMAL", low: "BAJA" }[t.priority || "normal"]}]`).join("\n") || "Sin tareas activas"}\n\nEquipo: ${members.map((m) => m.name).join(", ")}`;
+    return `NEXO · REPORTE SEMANAL\n${created.length} tareas nuevas · ${completed.length} completadas · ${active.length} activas\n\nCarga actual:\n${active.map((t) => `• ${t.title} — ${t.assignee} [${{ critical: "CRÍTICA", high: "ALTA", normal: "NORMAL", low: "BAJA" }[t.priority || "normal"]}]`).join("\n") || "Sin tareas activas"}\n\nEquipo: ${members.map((m) => m.name).join(", ")}`;
+  }
+  $("#copy-weekly-report").onclick = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(weeklyReportText());
       toast("Reporte semanal copiado");
     } catch {
       toast("No se pudo copiar el reporte en este navegador");
     }
+  };
+  $("#share-weekly-report").onclick = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(weeklyReportText())}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    toast("Elige el chat y confirma el envío en WhatsApp");
   };
   $("#task-images").onchange = async (e) => {
     let files = [...(e.target.files || [])].slice(0, 3);

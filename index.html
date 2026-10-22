@@ -434,6 +434,14 @@
               <i data-lucide="lock-keyhole" class="h-4 w-4"></i
               ><span class="hidden lg:inline">Bloquear</span></button
             ><button
+              id="notifications-btn"
+              class="ghost flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[10px]"
+              title="Activar avisos gratuitos en este dispositivo"
+              aria-label="Activar avisos de tareas en este dispositivo"
+            >
+              <i data-lucide="bell" class="h-4 w-4"></i
+              ><span class="hidden sm:inline">Avisos</span></button
+            ><button
               id="logout-btn"
               class="ghost flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px]"
               title="Cerrar sesión"
@@ -1682,6 +1690,12 @@
             >
               <i data-lucide="copy" class="h-4 w-4"></i>COPIAR REPORTE
             </button>
+            <button
+              id="share-weekly-report"
+              class="ghost flex items-center gap-2 rounded-lg px-4 py-2.5 text-[10px]"
+            >
+              <i data-lucide="message-circle" class="h-4 w-4"></i>COMPARTIR
+            </button>
           </div>
           <div
             id="weekly-summary"
@@ -1936,6 +1950,6 @@
         </p>
       </div>
     </div>
-    <script src="./script.js?v=20261020-profile-photo-fix"></script>
+    <script src="./script.js?v=free-notifications-20261022"></script>
   </body>
 </html>
