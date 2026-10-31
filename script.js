@@ -77,7 +77,7 @@
   }
   function urlFor(slug) {
     const alias = encodeURIComponent(slug || "tu-alias");
-    return `https://nexo.link/${alias}`;
+    return `https://gaboomg.github.io/nexo-hub-operations/redirect.html?slug=${alias}`;
   }
   function go(tab) {
     if (["taller", "ventas"].includes(tab) && activeSession?.role !== "owner") {
@@ -503,7 +503,7 @@
     $("#link-list").innerHTML = list
       .map(
         (x) =>
-          `<div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div class="min-w-0"><div class="font-medium">${esc(x.client)} <span class="ml-2 rounded border border-[#35363e] px-1.5 py-0.5 text-[9px] text-[#a0a0ab]">${esc(x.category || "Otro")}</span></div><div class="mono mt-1 text-[10px] text-[#e5ff00]">${esc(urlFor(x.slug))}</div><div class="mt-1 truncate text-[10px] text-[#888a94]">→ ${esc(x.destination)}</div><div class="mono mt-1 text-[9px] text-[#777984]">${esc(x.frame || "Sin marco")} · ACTUALIZADO ${new Date(x.updated || Date.now()).toLocaleDateString("es-MX")}</div></div><div class="flex shrink-0 items-center gap-2"><span class="mono mr-1 text-[10px] text-[#a3ffcf]">${Number(x.scans) || 0}*</span><button data-link-edit="${esc(x.id)}" class="ghost rounded-lg p-2" title="Editar"><i data-lucide="pencil" class="h-4 w-4"></i></button><button data-link-delete="${esc(x.id)}" class="ghost rounded-lg p-2 text-[#f49898]" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></div></div>`,
+          `<div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"><div class="min-w-0"><div class="font-medium">${esc(x.client)} <span class="ml-2 rounded border border-[#35363e] px-1.5 py-0.5 text-[9px] text-[#a0a0ab]">${esc(x.category || "Otro")}</span></div><div class="mono mt-1 text-[10px] text-[#e5ff00]">${esc(urlFor(x.slug))}</div><div class="mt-1 truncate text-[10px] text-[#888a94]">→ ${esc(x.destination)}</div><div class="mono mt-1 text-[9px] text-[#777984]">${esc(x.frame || "Sin marco")} · ACTUALIZADO ${new Date(x.updated || Date.now()).toLocaleDateString("es-MX")}</div></div><div class="flex shrink-0 items-center gap-2"><span class="mono mr-1 text-[10px] text-[#a3ffcf]" title="Aperturas acumuladas del enlace">${Number(x.scans) || 0} lecturas</span><button data-link-edit="${esc(x.id)}" class="ghost rounded-lg p-2" title="Editar"><i data-lucide="pencil" class="h-4 w-4"></i></button><button data-link-delete="${esc(x.id)}" class="ghost rounded-lg p-2 text-[#f49898]" title="Eliminar"><i data-lucide="trash-2" class="h-4 w-4"></i></button></div></div>`,
       )
       .join("");
     lucide.createIcons();

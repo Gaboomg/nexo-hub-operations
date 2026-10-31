@@ -721,7 +721,7 @@
                   id="validate-url"
                   class="field flex-1"
                   type="url"
-                  placeholder="https://nexo.link/cliente"
+                  placeholder="https://gaboomg.github.io/nexo-hub-operations/redirect.html?slug=cliente"
                 /><button
                   id="validate-btn"
                   class="volt flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-xs"
@@ -1093,7 +1093,7 @@
                   class="field"
                   placeholder="Café Futura" /></label
               ><label class="mt-3 block"
-                ><span class="label">Alias · nexo.link/</span
+                ><span class="label">Alias NEXO</span
                 ><input
                   id="link-slug"
                   class="field"
@@ -1181,7 +1181,7 @@
                   id="link-short"
                   class="mono break-all text-xs text-[#e5ff00]"
                 >
-                  https://nexo.link/tu-alias
+                  https://gaboomg.github.io/nexo-hub-operations/redirect.html?slug=tu-alias
                 </div>
               </div>
               <div class="mt-3 flex flex-wrap gap-2">
@@ -1199,9 +1199,9 @@
               </div>
               <p class="mt-3 text-[10px] leading-4 text-[#686a74]">
                 El alias y el destino se guardan en Supabase. Para redirección
-                dinámica real, configura nexo.link y conecta un servicio servidor.
-                Mientras no exista, usa un dominio que controles: un QR estático
-                no puede cambiar su destino por sí solo.
+                dinámica real y suma una lectura al contador antes de redirigir.
+                El chip debe guardar esta URL de NEXO; un enlace directo al
+                destino no pasa por el contador.
               </p>
             </article>
             <aside
@@ -1233,7 +1233,7 @@
                 id="qr-caption"
                 class="mono mt-3 max-w-full truncate text-xs text-[#e5ff00]"
               >
-                nexo.link/tu-alias
+                NEXO · ENLACE DINÁMICO
               </div>
               <div class="mono mt-1 text-[9px] text-[#71737d]">
                 ERROR CORRECTION: H
@@ -1254,7 +1254,7 @@
               </div>
             </div>
             <div class="panel metric rounded-xl p-4">
-              <div class="label">Clics / escaneos*</div>
+              <div class="label">Lecturas totales</div>
               <div
                 id="metric-clicks"
                 class="mt-1 text-3xl font-semibold text-[#a3ffcf]"
@@ -1262,7 +1262,7 @@
                 000
               </div>
               <div class="mono mt-1 text-[9px] text-[#777984]">
-                DEMO / LOCAL
+                CONTADOR POR ENLACE
               </div>
             </div>
             <div class="panel metric rounded-xl p-4">
@@ -1321,9 +1321,9 @@
             <div
               class="border-t border-[#25262e] px-5 py-3 text-[10px] leading-4 text-[#777984]"
             >
-              * Los escaneos son una estimación demostrativa guardada
-              localmente; esta app no recibe eventos de escaneo. Analítica real
-              requiere backend de redirección.
+              Cada lectura suma una apertura del enlace de NEXO. El total no
+              identifica celulares únicos y puede incluir vistas previas
+              automáticas. Requiere la función de conteo de Supabase activa.
             </div>
           </article>
           <div class="mt-4 flex justify-end">
