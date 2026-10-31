@@ -1,0 +1,9 @@
+name = "nexo-link-redirect"
+main = "worker.js"
+compatibility_date = "2026-10-20"
+workers_dev = false
+routes = [{ pattern = "nexo.link/*", zone_name = "nexo.link" }]
+
+[vars]
+SUPABASE_URL = "https://gpzqlcehqrokapezasff.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_jB435qQ0J0TUOr0pWGWHtg_mjkqbnDA"
