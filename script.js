@@ -103,6 +103,10 @@
         "QR & Links / Gestión",
         "Crea aliases, actualiza destinos y prepara códigos.",
       ],
+      placeid: [
+        "Reseñas NFC / Place ID",
+        "Encuentra la ficha exacta desde la dirección y prepara su enlace de reseñas para NFC.",
+      ],
       metricas: [
         "Administración / Analíticas",
         "Gestiona destinos, estilos y actividad de los enlaces de tus clientes.",
@@ -194,8 +198,9 @@
   );
   $("#ndef-kind").onchange = () => {
     let k = $("#ndef-kind").value,
+      reviewLink = $("#google-review-link").textContent,
       p = {
-        review: "https://g.page/r/tu-enlace-de-resenas",
+        review: /^https:\/\/search\.google\.com\//.test(reviewLink) ? reviewLink : "",
         whatsapp: "https://wa.me/521XXXXXXXXXX?text=Hola",
         menu: "https://tusitio.com/menu",
         instagram: "https://instagram.com/tu-negocio",
@@ -378,6 +383,126 @@
     $("#link-qr-color-label").textContent = fg.toUpperCase();
     $("#link-bg-color-label").textContent = bg.toUpperCase();
   }
+  const PLACES_SEARCH_ENDPOINT =
+    "https://nexo-link-redirect.gabrieljuarezesme.workers.dev/api/place-search";
+  let googlePlaceResults = [];
+  let selectedGooglePlaceId = "";
+  function renderGoogleReviewLink(placeId = "") {
+    const validPlaceId = /^[A-Za-z0-9_-]{5,200}$/.test(placeId);
+    const link = validPlaceId
+      ? `https://search.google.com/local/writereview?${new URLSearchParams({ placeid: placeId })}`
+      : "";
+    $("#google-review-place-id").textContent = placeId || "—";
+    $("#google-review-link").textContent = link || "El enlace aparecerá después de seleccionar el local.";
+    $("#google-review-copy").disabled = !link;
+    $("#google-review-copy-id").disabled = !validPlaceId;
+    $("#google-review-status").textContent = link ? "ENLACE LISTO" : "ESPERANDO LOCAL";
+    return link;
+  }
+  function clearGooglePlaceSelection() {
+    if (!selectedGooglePlaceId) return;
+    selectedGooglePlaceId = "";
+    googlePlaceResults = [];
+    $("#google-place-selected").textContent = "Busca una dirección y selecciona la ficha correcta para ver su ID.";
+    renderGooglePlaceResults();
+    renderGoogleReviewLink();
+  }
+  function renderGooglePlaceResults() {
+    const wrap = $("#google-place-results-wrap");
+    const container = $("#google-place-results");
+    wrap.classList.toggle("hidden", googlePlaceResults.length === 0);
+    container.innerHTML = googlePlaceResults.map((place, index) => `
+      <button type="button" data-google-place-index="${index}" class="placeid-result group flex w-full items-start gap-3 rounded-lg border p-3 text-left transition focus-visible:outline-none">
+        <span class="placeid-result-icon mt-0.5 rounded-md p-2"><i data-lucide="map-pin" class="h-4 w-4"></i></span>
+        <span class="min-w-0 flex-1"><span class="placeid-result-name block text-xs font-semibold">${esc(place.name)}</span><span class="placeid-result-address mt-1 block text-[10px] leading-4">${esc(place.address)}</span><span class="placeid-accent mt-2 block mono text-[8px] tracking-wide">SELECCIONAR ESTA FICHA</span></span>
+        <i data-lucide="arrow-right" class="placeid-result-arrow mt-1 h-4 w-4 shrink-0 transition"></i>
+      </button>`).join("");
+    lucide.createIcons();
+  }
+  $("#google-review-find-place").addEventListener("click", async () => {
+    const address = $("#google-review-address").value.trim();
+    const businessName = $("#google-review-business").value.trim();
+    if (address.length < 6) {
+      $("#google-review-address").focus();
+      return toast("Agrega la dirección completa del local");
+    }
+    if (!supabaseClient) return toast("El servicio de acceso no está disponible");
+
+    const button = $("#google-review-find-place");
+    const help = $("#google-review-address-help");
+    button.disabled = true;
+      button.innerHTML = '<i data-lucide="loader-circle" class="placeid-loader h-4 w-4"></i>BUSCANDO EN GOOGLE MAPS…';
+    lucide.createIcons();
+    help.textContent = "Consultando negocios cercanos a la dirección indicada…";
+    googlePlaceResults = [];
+    selectedGooglePlaceId = "";
+    renderGooglePlaceResults();
+    renderGoogleReviewLink();
+    $("#google-place-selected").textContent = "Busca una dirección y selecciona la ficha correcta para ver su ID.";
+    try {
+      const { data: { session } = {} } = await supabaseClient.auth.getSession();
+      if (!session?.access_token) throw new Error("AUTH_REQUIRED");
+      const response = await fetch(PLACES_SEARCH_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ address, businessName }),
+        cache: "no-store",
+        credentials: "omit",
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || `HTTP_${response.status}`);
+      googlePlaceResults = Array.isArray(result.places) ? result.places : [];
+      renderGooglePlaceResults();
+      help.textContent = googlePlaceResults.length
+        ? `Google encontró ${googlePlaceResults.length} coincidencia${googlePlaceResults.length === 1 ? "" : "s"}. Confirma la dirección antes de seleccionar.`
+        : "No encontramos una ficha con esos datos. Revisa el nombre y la dirección, e inténtalo de nuevo.";
+      if (!googlePlaceResults.length) toast("No hubo coincidencias; revisa la dirección");
+    } catch (error) {
+      const messages = {
+        AUTH_REQUIRED: "Tu sesión venció. Vuelve a iniciar sesión y repite la búsqueda.",
+        TEAM_ACCESS_REQUIRED: "Esta cuenta aún no está autorizada en el equipo NEXO. Pide al propietario que la agregue al Hub.",
+        PLACES_NOT_CONFIGURED: "Falta configurar la clave privada de Google Places en el Worker de Cloudflare.",
+        PLACES_SEARCH_FAILED: "Google Places rechazó la búsqueda. Revisa la clave, API habilitada y facturación.",
+        PLACES_UNAVAILABLE: "Google Maps no está disponible en este momento. Inténtalo de nuevo.",
+      };
+      help.textContent = messages[error.message] || "No se pudo completar la búsqueda. Revisa tu conexión e inténtalo de nuevo.";
+      toast("No se pudo buscar el negocio");
+    } finally {
+      button.disabled = false;
+      button.innerHTML = '<i data-lucide="search" class="h-4 w-4"></i>BUSCAR LOCAL Y PLACE ID';
+      lucide.createIcons();
+    }
+  });
+  ["#google-review-address", "#google-review-business"].forEach((selector) => {
+    $(selector).addEventListener("input", clearGooglePlaceSelection);
+  });
+  $("#google-place-results").addEventListener("click", (event) => {
+    const option = event.target.closest("[data-google-place-index]");
+    if (!option) return;
+    const place = googlePlaceResults[Number(option.dataset.googlePlaceIndex)];
+    if (!place?.id) return;
+    selectedGooglePlaceId = place.id;
+    $("#google-review-business").value = place.name;
+    $("#google-review-address").value = place.address;
+    $("#google-place-selected").innerHTML = `<span class="placeid-result-name font-semibold">${esc(place.name)}</span><span class="block mt-1">${esc(place.address)}</span>`;
+    renderGoogleReviewLink(place.id);
+    $("#google-review-status").textContent = "LOCAL CONFIRMADO";
+    toast("Local confirmado; Place ID y enlace listos");
+  });
+  $("#google-review-copy-id").addEventListener("click", async () => {
+    if (selectedGooglePlaceId) await copy(selectedGooglePlaceId, "Place ID copiado");
+  });
+  $("#google-review-copy").addEventListener("click", async () => {
+    const link = renderGoogleReviewLink(selectedGooglePlaceId);
+    if (!link) return toast("Pega un Place ID válido para generar el enlace");
+    $("#ndef-kind").value = "custom";
+    $("#ndef-url").value = link;
+    renderNdef();
+    await copy(link, "Enlace copiado y preparado para grabar en el chip NFC");
+  });
   $("#link-client").oninput = () => {
     if (!editing && !$("#link-slug").dataset.custom)
       $("#link-slug").value = slugify($("#link-client").value);

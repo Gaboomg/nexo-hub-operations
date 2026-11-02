@@ -489,6 +489,14 @@
             ></button
           ><button
             class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
+            data-tab="placeid"
+          >
+            <i data-lucide="map-pin-check" class="h-5 w-5"></i
+            ><span class="text-[10px] font-medium tracking-wide"
+              >PLACE ID</span
+            ></button
+          ><button
+            class="nav-btn flex flex-col items-center gap-1 px-4 py-1.5"
             data-tab="metricas"
           >
             <i data-lucide="chart-no-axes-combined" class="h-5 w-5"></i
@@ -1240,6 +1248,86 @@
               </div>
             </aside>
           </div>
+        </section>
+
+        <section id="tab-placeid" class="tab-pane">
+          <article class="panel mx-auto max-w-4xl rounded-2xl p-5 sm:p-7">
+            <div class="mb-6 flex items-start gap-3 sm:gap-4">
+              <div class="placeid-icon rounded-xl border p-3">
+                <i data-lucide="map-pin-check" class="h-5 w-5"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="placeid-accent mono mb-1 text-[9px] tracking-[.18em]">GOOGLE REVIEWS / NFC</div>
+                <h2 class="text-xl font-semibold tracking-[-.04em] sm:text-2xl">Generador de reseñas</h2>
+                <p class="mt-1 max-w-2xl text-xs leading-5 text-[#858792]">
+                  Escribe la dirección del local. NEXO buscará su ficha de Google, mostrará coincidencias para confirmar el lugar y generará el enlace para el chip.
+                </p>
+              </div>
+            </div>
+
+            <div class="placeid-main-grid grid gap-4">
+              <div class="space-y-4">
+                <section class="placeid-card rounded-xl border p-4 sm:p-5" aria-labelledby="place-search-title">
+                  <div class="mb-3 flex items-center gap-2.5">
+                    <span class="placeid-step-number mono grid h-7 w-7 place-items-center rounded-full border text-[10px]">01</span>
+                    <h3 id="place-search-title" class="text-sm font-semibold">Ubica el negocio</h3>
+                  </div>
+                  <label for="google-review-business" class="label">Nombre del negocio <span class="text-[#737680]">(opcional)</span></label>
+                  <input id="google-review-business" class="field mb-3" type="text" autocomplete="organization" placeholder="Ej. Barbería Luis" />
+                  <label for="google-review-address" class="label">Dirección del local</label>
+                  <textarea id="google-review-address" class="placeid-address field resize-y" autocomplete="street-address" maxlength="240" placeholder="Calle, número, colonia, ciudad y estado"></textarea>
+                  <button id="google-review-find-place" type="button" class="volt mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-xs">
+                    <i data-lucide="search" class="h-4 w-4"></i>BUSCAR LOCAL Y PLACE ID
+                  </button>
+                  <p id="google-review-address-help" class="mt-2 text-[10px] leading-4 text-[#777984]" aria-live="polite">
+                    Escribe la dirección completa para diferenciar negocios con nombres o ubicaciones parecidas.
+                  </p>
+                </section>
+
+                <section id="google-place-results-wrap" class="placeid-card hidden rounded-xl border p-4 sm:p-5" aria-labelledby="google-place-results-heading">
+                  <div class="mb-3 flex items-center gap-2.5">
+                    <span class="placeid-step-number mono grid h-7 w-7 place-items-center rounded-full border text-[10px]">02</span>
+                    <div>
+                      <h3 id="google-place-results-heading" class="text-sm font-semibold">Confirma cuál local es</h3>
+                      <p class="mt-0.5 text-[10px] text-[#777984]">Selecciona la ficha que coincide con la dirección.</p>
+                    </div>
+                  </div>
+                  <div id="google-place-results" class="space-y-2" aria-live="polite"></div>
+                </section>
+              </div>
+
+              <div class="space-y-4">
+                <section class="placeid-card rounded-xl border p-4 sm:p-5" aria-labelledby="google-place-id-heading">
+                  <div class="mb-3 flex items-center gap-2.5">
+                    <span class="placeid-step-number mono grid h-7 w-7 place-items-center rounded-full border text-[10px]">03</span>
+                    <h3 id="google-place-id-heading" class="text-sm font-semibold">Place ID identificado</h3>
+                  </div>
+                  <div id="google-place-selected" class="mb-3 text-xs leading-5 text-[#8b8e98]">Busca una dirección y selecciona la ficha correcta para ver su ID.</div>
+                  <div class="flex min-w-0 items-center gap-2 rounded-lg border border-[#303139] bg-[#0b0c10] p-3">
+                    <code id="google-review-place-id" class="placeid-value mono min-w-0 flex-1 break-all text-[11px]">—</code>
+                    <button id="google-review-copy-id" type="button" class="ghost shrink-0 rounded-md p-2" aria-label="Copiar Place ID" disabled>
+                      <i data-lucide="copy" class="h-4 w-4"></i>
+                    </button>
+                  </div>
+                </section>
+
+                <section class="placeid-review-card rounded-xl border p-4 sm:p-5" aria-labelledby="google-review-link-heading">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                      <span class="placeid-step-number mono grid h-7 w-7 place-items-center rounded-full border text-[10px]">04</span>
+                      <h3 id="google-review-link-heading" class="text-sm font-semibold">Enlace listo para el NFC</h3>
+                    </div>
+                    <span id="google-review-status" class="mono text-[8px] text-[#858792]" aria-live="polite">ESPERANDO LOCAL</span>
+                  </div>
+                  <code id="google-review-link" class="placeid-link mono block min-h-14 break-all rounded-lg border p-3 text-[11px] leading-5" aria-live="polite">El enlace aparecerá después de seleccionar el local.</code>
+                  <button id="google-review-copy" type="button" class="volt mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-xs disabled:cursor-not-allowed disabled:opacity-40" disabled>
+                    <i data-lucide="radio" class="h-4 w-4"></i>COPIAR ENLACE PARA GRABAR EN NFC
+                  </button>
+                  <p class="mt-2 text-[10px] leading-4 text-[#858792]">Al copiar, el enlace queda preparado también en el asistente NDEF de Taller. Pruébalo antes de grabar varios chips.</p>
+                </section>
+              </div>
+            </div>
+          </article>
         </section>
 
         <section id="tab-metricas" class="tab-pane">

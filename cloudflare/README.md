@@ -1,14 +1,20 @@
-# Redirección y lecturas de NFC
+# Redirección y lecturas NFC
 
-El Hub ya guarda el total de lecturas en `public.links.scans`. La ruta de GitHub Pages `redirect.html` funciona sin dominio propio. Cuando la zona `nexo.link` esté activa, el Worker registra una lectura por cada solicitud `GET` a `nexo.link/<alias>` y redirige a su destino HTTPS. El Worker responde solo a solicitudes `GET`.
+El Hub cuenta las solicitudes de redirección en `public.links.scans`. El Worker consulta la función RPC `record_link_scan`, aumenta el total solo para enlaces activos y redirige al destino HTTPS guardado. El conteo es agregado; no identifica teléfonos ni personas. Algunas aplicaciones pueden abrir enlaces automáticamente para generar una vista previa.
 
-## Activación
+## Producción
 
-1. En Supabase → **SQL Editor**, ejecuta una vez `../backend-setup/record-link-scan.sql`.
-2. Confirma que la zona `nexo.link` esté activa en Cloudflare y que los nameservers del dominio ya apunten a Cloudflare.
-3. En **Workers & Pages → nexo-link-redirect → Edit code**, publica `worker.js`; añade las variables de texto `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` desde Settings → Variables and Secrets usando los valores definidos en `wrangler.toml`.
-4. En Workers & Pages → nexo-link-redirect → Domains & Routes, añade la ruta `nexo.link/*` asociada a la zona `nexo.link`. La zona tiene que estar activa en Cloudflare.
-5. Cuando el Worker y la ruta estén activos, el Hub puede usar `https://nexo.link/<alias>` como destino del QR. Sin la zona activa, continúa utilizando la URL de GitHub Pages generada por **QR & Links**.
-6. Para ver el total, entra a **Administración / Analíticas** y actualiza la página. El recuento está junto a cada enlace y el total aparece en **Lecturas totales**.
+El Worker `nexo-link-redirect` y la ruta `nexo.link/*` ya están creados en Cloudflare. La función RPC ya está habilitada en Supabase y las variables de producción ya están guardadas en el Worker. La zona del dominio seguirá pendiente hasta que Namecheap use los nameservers asignados por Cloudflare; después de eso se propagará el DNS.
 
-El conteo es agregado. No identifica teléfonos o personas; algunas aplicaciones pueden abrir enlaces automáticamente para generar una vista previa.
+## Desarrollo y despliegue
+
+1. Ejecuta una vez `../backend-setup/record-link-scan.sql` en Supabase.
+2. En Cloudflare, establece `SUPABASE_URL` como variable de entorno. Guarda `SUPABASE_PUBLISHABLE_KEY` como secreto; no lo añadas al repositorio ni al archivo TOML.
+3. Para activar el generador Google Reviews, habilita Places API (New) en Google Cloud con facturación y crea una clave restringida a Places API. Guárdala en el Worker como secreto `GOOGLE_PLACES_API_KEY`; nunca la agregues al código del navegador, al repositorio ni al TOML. La búsqueda exige una cuenta autenticada que tenga perfil autorizado en `team_members` y retorna solo ID, nombre, dirección y URL de Maps.
+4. Para el desarrollo con Wrangler, configura los secretos con `npx wrangler secret put SUPABASE_PUBLISHABLE_KEY` y `npx wrangler secret put GOOGLE_PLACES_API_KEY`, y publícalo con `npx wrangler deploy`.
+5. Activa `nexo.link` en Cloudflare cuando el dominio esté delegado a sus nameservers. La zona contiene los registros DNS importados de Namecheap, incluidos MX y SPF para conservar el reenvío de correo.
+6. Confirma que la ruta `nexo.link/*` esté enlazada al Worker y que una prueba de enlace activo redirija al destino esperado. El generador Place ID usa `https://nexo-link-redirect.gabrieljuarezesme.workers.dev/api/place-search`.
+7. El Hub puede generar enlaces QR `https://nexo.link/<alias>` cuando el dominio esté activo. Hasta entonces, conserva la URL de respaldo de GitHub Pages.
+8. Consulta los totales en **Administración → Analíticas**, junto a cada enlace y en **Lecturas totales**.
+
+El Worker valida los alias y solo redirige a destinos HTTPS. El endpoint `POST /api/place-search` aplica CORS limitado al Hub y valida la sesión de Supabase y el rol propietario antes de consultar Google Places. Los enlaces inactivos o inexistentes responden con página no encontrada. Google Maps Platform factura según los SKU y el volumen de solicitudes; revisa sus cargos antes de habilitar Places API.
